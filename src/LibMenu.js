@@ -50,6 +50,21 @@ class LibMenu extends React.Component {
 
     }
 
+    setSearch(search) {
+        this.setState({ search: search });
+        this.resetView();
+    }
+
+    resetView() {
+        // scroll to top with animation
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+
+        });
+        
+    }
+
     subcatClick(subcat) {
         var subcats = [];
         // add subcategories from state
@@ -70,42 +85,72 @@ class LibMenu extends React.Component {
         this.setState({ search: event.target.value });
     }
 
-    filterBySearch(entry) {
-        let search = this.state.search.toLowerCase();
+    filterBySingleString(entry, search) {
+
         if (search === '') {
             return true;
         }
 
+        let inverted = false;
+
+        // check for special search options
+        if (search.startsWith('-') || search.startsWith('!')) {
+            inverted = true;
+            search = search.substring(1);
+        }
+
+
+
         // check if search is in title
         if (entry['title'].toLowerCase().includes(search)) {
-            return true;
+            return true ^ inverted;
         }
 
         // check if search is in author
         if (entry['author'].toLowerCase().includes(search)) {
-            return true;
+            return true ^ inverted;
         }
 
         // check if search is in category
         for (let cat of entry['category']) {
             if (cat.toLowerCase().includes(search)) {
-                return true;
+                return true ^ inverted;
             }
         }
 
         // check if search is in subcategory
         for (let subcat of entry['subcategory']) {
             if (subcat.toLowerCase().includes(search)) {
-                return true;
+                return true ^ inverted;
             }
         }
 
         // check if search is in series
         if (entry['series'].toLowerCase().includes(search)) {
+            return true ^ inverted;
+        }
+
+        return false ^ inverted;
+
+    }
+
+
+
+    filterBySearch(entry) {
+        let search = this.state.search.toLowerCase();
+        if (search === '') {
             return true;
         }
 
-        return false;
+        let seaches = search.split('+');
+        for (let s of seaches) {
+            // every search must be in entry, otherwise return false
+            if (!this.filterBySingleString(entry, s)) {
+                return false;
+            }
+        }
+
+        return true;
 
     }
 
@@ -115,27 +160,45 @@ class LibMenu extends React.Component {
         var filtered = [];
 
         // filter every entry
-        mainLoop:for (let i = 0; i < lib.length; i++) {
+        mainLoop: for (let i = 0; i < lib.length; i++) {
             let entry = lib[i];
             // filter by type
             if (this.state.type !== MenuType.ALL) {
-                if (entry.type !== this.state.type) {
-                    continue mainLoop;
+
+                switch (this.state.type) {
+                    case MenuType.AUDIOBOOKS:
+                        if (entry.type !== "audiobook") {
+                            continue mainLoop;
+                        }
+                        break;
+                    case MenuType.PODCASTS:
+                        if (entry.type !== "podcast") {
+                            continue mainLoop;
+                        }
+                        break;
+                    case MenuType.AUTHORS:
+                        // TODO: show list of authors
+                        break;
+                    case MenuType.FAVOURITES:
+                        // TODO: show list of favourites
+                        break;
+                    default:
+                        break;
                 }
             }
 
             // filter by categories
-            if(this.state.categories.length > 0)
+            if (this.state.categories.length > 0)
                 for (let cat of this.state.categories) {
                     if (!entry.category.includes(cat)) {
                         continue mainLoop;
                     }
                 }
-            
+
 
             // filter by subcategories
 
-            if(this.state.subcategories.length > 0)
+            if (this.state.subcategories.length > 0)
                 for (let subcat of this.state.subcategories) {
                     if (!entry.subcategory.includes(subcat)) {
                         continue mainLoop;
@@ -162,7 +225,6 @@ class LibMenu extends React.Component {
             return 0;
         });
 
-        console.log(filtered.length);
         return filtered;
     }
 
@@ -190,52 +252,6 @@ class LibMenu extends React.Component {
         // create map of categories and subcategories
         let categories = {};
         let subcategories = {};
-        /*
-        for (let i = 0; i < library.length; i++) {
-            let entry = library[i];
-            let cats = entry['category'];
-
-            // continue if state.categories is not empty and entry does not contain all of the categories
-            if (this.state.categories.length != 0 && !this.state.categories.every(cat => cats.includes(cat))) {
-                continue;
-            }
-
-            let subcats = entry['subcategory'];
-            // continue if state.subcategories is not empty and entry does not contain all of the subcategories
-            if (this.state.subcategories.length != 0 && !this.state.subcategories.every(subcat => subcats.includes(subcat))) {
-                continue;
-            }
-
-            // continue if search is not empty and entry does not contain search
-            if (!this.filterBySearch(entry)) {
-                continue;
-            }
-
-            let checkSubs = false;
-
-            for (let cat of cats) {
-                if (categories[cat] === undefined) {
-                    categories[cat] = 0;
-                }
-                if (this.state.categories.includes(cat)) {
-                    checkSubs = true;
-                }
-                categories[cat]++;
-            }
-
-            if (!checkSubs) {
-                continue;
-            }
-
-
-            for (let subcat of subcats) {
-                if (subcategories[subcat] === undefined) {
-                    subcategories[subcat] = 0;
-                }
-                subcategories[subcat]++;
-            }
-
-        }*/
 
         // count categories and subcategories
         for (let i = 0; i < library.length; i++) {
@@ -295,7 +311,7 @@ class LibMenu extends React.Component {
                 <div className="libMenu">
                     <div className="libMenuTitleBar">
                         <h1 className="libMenuTitle">Library</h1>
-                        <input className="libMenuSearch" type="text" placeholder="Search" onChange={(event) => { this.searchChange(event); }} />
+                        <input className="libMenuSearch" type="text" placeholder="Search" value={this.state.search} onChange={(event) => { this.searchChange(event); }} />
 
                     </div>
                     <div className="libMenuFilterBar">
@@ -310,7 +326,7 @@ class LibMenu extends React.Component {
 
 
                 </div>
-                <LibList library={library} />
+                <LibList library={library} libMenu={this} />
             </div>
         );
     }

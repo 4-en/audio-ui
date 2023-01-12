@@ -13,6 +13,24 @@ body {
     --text-color-darker: #d5d5e1;
     --text-color-lighter: #9090c0;
 
+    --text-color-transparent: rgba(220, 220, 255, 0.5);
+
+    --text-color-contrast: rgb(236, 151, 24);
+
+
+}
+body.light-theme {
+    --bg-color: #f5f5f1;
+    --bg-color-darker: #e5e5e1;
+    --bg-color-lighter: #c5c5c1;
+    --text-color: #0d0d11;
+    --text-color-darker: #1a1a1e;
+    --text-color-lighter: #26262a;
+
+    --text-color-transparent: rgba(40, 40, 60, 0.5);
+}
+
+body {
     background-color: var(--bg-color);
     color: var(--text-color);
     /* center contents */
@@ -27,14 +45,6 @@ body {
     line-height: 1.5;
 
     width: 100v;
-}
-body.light-theme {
-    --bg-color: #f5f5f1;
-    --bg-color-darker: #e5e5e1;
-    --bg-color-lighter: #c5c5c1;
-    --text-color: #0d0d11;
-    --text-color-darker: #1a1a1e;
-    --text-color-lighter: #26262a;
 }
 
 .Library {
@@ -149,20 +159,164 @@ body.light-theme {
 
   }
 
-  .libEntryMain {
+  .libEntry {
     /* base div for library entry */
     /* flex from left to right */
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: center;
     margin-bottom: 10px;
-    border-radius: 30px;
-    border: solid 1px var(--text-color);
     padding: 10px;
+
+    /* dividing line between entries */
+    border-bottom: 1px solid var(--text-color-transparent);
     
     width: 100%;
-    height: 200px;
+    height: 190px;
+
+    /* transition: 0.2s; */
+    transition: height 0.2s;
+  }
+
+  /* no border at last entry */
+  .libEntry:last-child {
+    border-bottom: none;
+  }
+
+  .libEntry.extended {
+    /* flex from top to bottom */
+    min-height: 200px;
+    height: auto;
+  }
+
+
+
+  .libEntryMain {
+    margin: 14px;
+  }
+
+  .libEntryRight {
+    margin: 14px;
+  }
+
+  .libEntryStar {
+    color: gold;
+  }
+
+  .libEntryCover {
+    margin: 14px;
+    height: 138px;
+    width: 138px;
+
+    border-radius: 10px;
+  }
+
+  .libEntryMain {
+    /* fill empty space of parent */
+    flex-grow: 1;
+  }
+
+  .libEntryRight {
+    /* align elements on right side */
+    text-align: right;
+    align-items: right;
+    /* align image right */
+
+  }
+
+  .libEntryTitle {
+    font-size: x-large;
+  }
+
+  .libEntryDetails {
+    color: var(--text-color-transparent);
+    font-size: medium;
+    overflow: hidden;
+
+  }
+
+  .libEntryDescription {
+    max-width: 500px;
+    visibility: hidden;
+  }
+
+  .libEntry.extended .libEntryDescription {
+    visibility: visible;
+  }
+
+  .libSeriesEntry {
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .libSeriesEntry:hover {
+    /* glow effect */
+    box-shadow: 2px 2px 5px 2px var(--bg-color-darker);
+    border-style: none;
+  }
+
+  .libEntryCategories {
+    display: inline;
+  }
+
+  .libEntryCategory {
+    display: inline;
+    margin-right: 5px;
+  }
+
+  .libEntryLink {
+    color: var(--text-color-transparent);
+    text-decoration: none;
+    transition: 0.2s;
+    cursor: pointer;
+  }
+
+  .libEntryLink:hover {
+    color: var(--text-color);
+    /* glow effect */
+    text-shadow: 0 0 10px var(--text-color);
+    text-decoration: underline;
+  }
+
+
+  .libEntryButtons {
+    /* flex from top to bottom */
+    display: flex;
+    flex-direction: row;
+    /* align elements on right side */
+    text-align: right;
+    justify-content: right;
+    /* align image right */
+    margin-top: 15px;
+  }
+
+  .libEntryButton {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    border-radius: 10px;
+    margin: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    text-align: center;
+    margin: 10px;
+    font-size: x-large;
+    height: 40px;
+    padding: 0 20px;
+    border: 1.5px solid var(--text-color);
+  }
+
+  .libEntryButton:hover {
+    background-color: transparent;
+    color: var(--text-color);
+  }
+
+  .libEntryPlay {
+    margin-right: 0;
+  }
+
+  .libFavButtonImage {
+    /* color svg gold */
+    fill: #FFD700;
+
   }
 
   .disabled {
