@@ -188,6 +188,35 @@ body {
     height: auto;
   }
 
+  .libMenuFilterSortContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+
+  .libMenuSortContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    align-items: center;
+  }
+
+  .libMenuSorter {
+    border-radius: 20px;
+    border-style:solid;
+    border-color: var(--text-color);
+    border-width: 1.5px;
+    color: var(--text-color);
+    margin-left: 10px;
+    height: 40px;
+    padding: 0 10px;
+  }
+
+  .libMenuSorter option {
+    background-color: var(--bg-color-darker);
+  }
+
 
 
   .libEntryMain {

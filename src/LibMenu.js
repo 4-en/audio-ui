@@ -11,6 +11,15 @@ const MenuType = {
     FAVOURITES: 'Favourites'
 };
 
+// enum for sorting mode 
+const SortMode = {
+    NAME: "Name",
+    DATE_RELEASED: "Release date",
+    DATE_ADDED: "Recent",
+    RATING: "Rating",
+    STATUS: "Status"
+}
+
 class LibMenu extends React.Component {
     constructor(props) {
         super(props);
@@ -314,8 +323,18 @@ class LibMenu extends React.Component {
                         <input className="libMenuSearch" type="text" placeholder="Search" value={this.state.search} onChange={(event) => { this.searchChange(event); }} />
 
                     </div>
-                    <div className="libMenuFilterBar">
-                        {filterButtons}
+                    <div className="libMenuFilterSortContainer">
+                        <div className="libMenuFilterBar">
+                            {filterButtons}
+                        </div>
+                        <div className="libMenuSortContainer">
+                            <div className="libMenuSortDirection">ASC.</div>
+                        <select className="libMenuSorter">
+                            <option>C++</option>
+                            <option>Python</option>
+                            <option>JS</option>
+                        </select>
+                        </div>
                     </div>
                     <div className="libMenuCategoryBar">
                         {categoryButtons}
