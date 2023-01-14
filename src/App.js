@@ -3,7 +3,6 @@ import './style.css';
 import LibMenu from './LibMenu';
 import React from 'react';
 
-const { userModeToggle } = require('./dark-light-toggle.js');
 
 // load library from json file
 //const library = require('./library.json');
@@ -54,10 +53,8 @@ class App extends React.Component {
     this.state = {
       library: this.props.library
     };
-
-
+    
     this.myMenu = React.createRef();
-    this.myList = React.createRef();
 
   }
 

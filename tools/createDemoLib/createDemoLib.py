@@ -166,7 +166,9 @@ while i < size:
                 "price": round( random.random() * 20 + 5.99, 2),
                 "cover": "",
                 "releaseDate": releaseDate,
-                "addedDate": addedDate
+                "addedDate": addedDate,
+                "progress": 0,
+                "seriesIndex": k+1
             }
             cover = [ entry["type"] + "cover"]
             #(s for s in entry["series"].split(" ")) + (t for t in entry["title"].split(" ")) + (c for c in entry["category"])]
