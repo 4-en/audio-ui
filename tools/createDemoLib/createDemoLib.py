@@ -2,6 +2,7 @@
 import random
 import json
 from faker import Faker
+import webuiapi
 
 faker = Faker()
 
@@ -49,11 +50,11 @@ entries = []
 
 # constants
 MULT_ENTRIES_PER_AUTHOR_CHANCE = 0.4
-MULT_ENTRIES_PER_AUTHOR_MAX = size // 10
+MULT_ENTRIES_PER_AUTHOR_MAX = size // 12+2
 MULT_ENTRIES_PER_AUTHOR_MIN = 2
 
 MULT_ENTRIES_PER_SERIES_CHANCE = 0.33
-MULT_ENTRIES_PER_SERIES_MAX = size // 5
+MULT_ENTRIES_PER_SERIES_MAX = size // 20+3
 MULT_ENTRIES_PER_SERIES_MIN = 1
 
 MULT_CHAPTERS_CHANCE = 0.8
@@ -73,14 +74,39 @@ RELEASE_DATE_MAX = 1577836800
 ADDED_DATE_MIN = 1262304000
 ADDED_DATE_MAX = 1577836800
 
+api = webuiapi.WebUIApi()
+
 
 types = ["audiobook", "podcast"]
 
-categories = ["fantasy", "horror", "romance", "sci-fi", "thriller", "western"]
+categories = ["fantasy", "horror", "romance", "sci-fi", "thriller", "western", "history", "biography", "children"]
 subcategories = ["action", "adventure", "comedy", "drama", "mystery", "romance", "satire", "tragedy", "tragicomedy"]
 
-def createCover(*args):
-    return "output.jpg"
+def createPrompt(categories, title, series):
+    negative_prompt = "low quality, out of frame, worst quality, blurry, lowres"
+    prompt = "high quality, best quality, highres, "
+
+    prompt += "book cover for book with title " + title + ", "
+
+    if series != "":
+        prompt += "series " + series + ", "
+
+    for c in categories:
+        prompt += c + ", "
+    prompt = prompt[:-2]
+
+    return prompt, negative_prompt
+
+def createCover(entry):
+    pos, neg = createPrompt(entry["category"], entry["title"], entry["series"])
+
+    result = api.txt2img(prompt=pos, negative_prompt=neg, cfg_scale=14, sampler_index='DDIM', steps=24)
+    img = result.image
+    # generate random string for file name
+    name = faker.uuid4() + ".jpg"
+    img.save("out/" + name)
+
+    return name
 
 titleGenerators = [
     lambda: words.noun() + " " + words.noun(),
@@ -104,6 +130,8 @@ def oldGenerateTitle():
 # create entries
 i = 0
 while i < size:
+    # print progress
+    print("Creating entry " + str(i + 1) + " of " + str(size))
     # generate new author
     author = faker.name()
 
@@ -170,10 +198,8 @@ while i < size:
                 "progress": 0,
                 "seriesIndex": k+1
             }
-            cover = [ entry["type"] + "cover"]
-            #(s for s in entry["series"].split(" ")) + (t for t in entry["title"].split(" ")) + (c for c in entry["category"])]
-            cover += entry["series"].split(" ") + entry["title"].split(" ") + entry["category"]
-            entry["cover"] = createCover(cover)
+            
+            entry["cover"] = createCover(entry)
             entries.append(entry)
 
             # create new dates after this entry based on nr of entries in series

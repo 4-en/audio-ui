@@ -31,6 +31,8 @@ class LibMenu extends React.Component {
             maxSubcategories: 5,
             search: ''
         };
+
+        this.myList = React.createRef();
     }
 
     getLibrary() {
@@ -328,11 +330,13 @@ class LibMenu extends React.Component {
                             {filterButtons}
                         </div>
                         <div className="libMenuSortContainer">
-                            <div className="libMenuSortDirection">ASC.</div>
-                        <select className="libMenuSorter">
-                            <option>C++</option>
-                            <option>Python</option>
-                            <option>JS</option>
+                            <div className="libMenuSortDirection al-button" onClick={(e)=>{this.myList.current.setSortAsc(e);}}>↓</div>
+                        <select className="libMenuSorter al-button" onChange={(e)=> { this.myList.current.setSortMode(e);}}>
+                            <option className='al-button'>{SortMode.NAME}</option>
+                            <option className='al-button'>{SortMode.DATE_RELEASED}</option>
+                            <option className='al-button'>{SortMode.DATE_ADDED}</option>
+                            <option className='al-button'>{SortMode.RATING}</option>
+                            <option className='al-button'>{SortMode.STATUS}</option>
                         </select>
                         </div>
                     </div>
@@ -345,7 +349,7 @@ class LibMenu extends React.Component {
 
 
                 </div>
-                <LibList library={library} libMenu={this} />
+                <LibList library={library} libMenu={this} ref={this.myList} />
             </div>
         );
     }
