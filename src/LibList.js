@@ -236,10 +236,10 @@ class LibSeriesEntry extends React.Component {
     let allFinished = true;
     let allNotStarted = true;
     for (let entry of entries) {
-      if (allNotStarted && (entry.status !== ListenStatus.NOT_STARTED)) {
+      if (allNotStarted && (entry.progress > 0.05)) {
         allNotStarted = false;
       }
-      if (allFinished && (entry.status !== ListenStatus.COMPLETED)) {
+      if (allFinished && (entry.progress < 0.95)) {
         allFinished = false;
       }
     }
@@ -340,6 +340,7 @@ class LibSeriesEntry extends React.Component {
 
             <div className="libEntryDate libEntryDetails">{formatDate(this.getReleaseDate())}</div>
             <div className="libEntryCategories libEntryDetails">{this.getCategories()}</div>
+            { this.state.extended ? "" : <div className="libEntryDetails libEntryExpandText"><h3>Click to view titles</h3></div>}
           </div>
           <div className="libEntryRight">
 
