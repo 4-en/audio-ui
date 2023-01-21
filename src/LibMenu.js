@@ -7,8 +7,7 @@ const MenuType = {
     ALL: 'All',
     AUDIOBOOKS: 'Audiobooks',
     PODCASTS: 'Podcasts',
-    AUTHORS: 'Authors',
-    FAVOURITES: 'Favourites'
+    AUTHORS: 'Authors'
 };
 
 // enum for sorting mode 
@@ -73,7 +72,7 @@ class LibMenu extends React.Component {
             behavior: 'smooth'
 
         });
-        
+
     }
 
     subcatClick(subcat) {
@@ -249,7 +248,10 @@ class LibMenu extends React.Component {
             if (this.state.type === MenuType[type]) {
                 className += 'button-selected';
             }
-            filterButtons.push(<button className={className} key={i} onClick={() => { this.filterClick(MenuType[type]); }}> {MenuType[type]} </button>);
+            filterButtons.push(<button className={className} key={i} onClick={() => {
+                this.filterClick(MenuType[type]);
+                this.props.callback({ type: "CLICK", name: "typeButton", value: type });
+            }}> {MenuType[type]} </button>);
             i++;
         }
 
@@ -304,7 +306,10 @@ class LibMenu extends React.Component {
             let className = 'al-button category-button ' + catSelected(cat, this.state.categories);
             // capitalize first letter
             let catName = cat.charAt(0).toUpperCase() + cat.slice(1) + " (" + categories[cat] + ")";
-            categoryButtons.push(<button className={className} key={i} onClick={() => { this.catClick(cat); }}> {catName} </button>);
+            categoryButtons.push(<button className={className} key={i} onClick={() => {
+                this.catClick(cat);
+                this.props.callback({ type: 'CLICK', name: "categoryButton", value: cat });
+            }}> {catName} </button>);
         }
 
         // create subcategory buttons
@@ -313,7 +318,10 @@ class LibMenu extends React.Component {
             let subcat = sortedSubcategories[i];
             let className = 'al-button subcategory-button ' + catSelected(subcat, this.state.subcategories);
             let subcatName = subcat.charAt(0).toUpperCase() + subcat.slice(1);
-            subcategoryButtons.push(<button className={className} key={i} onClick={() => { this.subcatClick(subcat); }}> {subcatName} </button>);
+            subcategoryButtons.push(<button className={className} key={i} onClick={() => {
+                this.subcatClick(subcat);
+                this.props.callback({ type: 'CLICK', name: "subcategoryButton", value: subcat });
+            }}> {subcatName} </button>);
         }
 
 
@@ -322,7 +330,10 @@ class LibMenu extends React.Component {
                 <div className="libMenu">
                     <div className="libMenuTitleBar">
                         <h1 className="libMenuTitle">Library</h1>
-                        <input className="libMenuSearch" type="text" placeholder="Search" value={this.state.search} onChange={(event) => { this.searchChange(event); }} />
+                        <input className="libMenuSearch" type="text" placeholder="Search" value={this.state.search} onChange={(event) => {
+                            this.searchChange(event);
+                            this.props.callback({ type: "KEY", name: "searchFieldInput", value: event.target.value });
+                        }} />
 
                     </div>
                     <div className="libMenuFilterSortContainer">
@@ -330,14 +341,17 @@ class LibMenu extends React.Component {
                             {filterButtons}
                         </div>
                         <div className="libMenuSortContainer">
-                            <div className="libMenuSortDirection al-button" onClick={(e)=>{this.myList.current.setSortAsc(e);}}>↓</div>
-                        <select className="libMenuSorter al-button" onChange={(e)=> { this.myList.current.setSortMode(e);}}>
-                            <option className='al-button'>{SortMode.NAME}</option>
-                            <option className='al-button'>{SortMode.DATE_RELEASED}</option>
-                            <option className='al-button'>{SortMode.DATE_ADDED}</option>
-                            <option className='al-button'>{SortMode.RATING}</option>
-                            <option className='al-button'>{SortMode.STATUS}</option>
-                        </select>
+                            <div className="libMenuSortDirection al-button" onClick={(e) => { this.myList.current.setSortAsc(e); }}>↓</div>
+                            <select className="libMenuSorter al-button" onChange={(e) => {
+                                this.myList.current.setSortMode(e);
+                                this.props.callback({ type: "CLICK", name: "sortButton", value: e.target.value });
+                            }}>
+                                <option className='al-button'>{SortMode.NAME}</option>
+                                <option className='al-button'>{SortMode.DATE_RELEASED}</option>
+                                <option className='al-button'>{SortMode.DATE_ADDED}</option>
+                                <option className='al-button'>{SortMode.RATING}</option>
+                                <option className='al-button'>{SortMode.STATUS}</option>
+                            </select>
                         </div>
                     </div>
                     <div className="libMenuCategoryBar">
@@ -349,7 +363,7 @@ class LibMenu extends React.Component {
 
 
                 </div>
-                <LibList library={library} libMenu={this} ref={this.myList} />
+                <LibList callback={this.props.callback} library={library} libMenu={this} ref={this.myList} />
             </div>
         );
     }

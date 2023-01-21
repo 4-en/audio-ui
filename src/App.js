@@ -66,7 +66,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="Library" onClick={() => { /*userModeToggle();*/ }}>
-        <LibMenu library={this} ref={this.myMenu} stateChanger={()=>{ this.filterUpdate(); }}/>
+        <LibMenu library={this} callback={this.props.callback} ref={this.myMenu} stateChanger={()=>{ this.filterUpdate(); }}/>
   
       </div>
     );

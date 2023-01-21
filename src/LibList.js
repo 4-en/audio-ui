@@ -145,7 +145,7 @@ class LibEntry extends React.Component {
         // add class extended to libEntry
         e.target.classList.toggle("extended");
       }}>
-        <img className="libEntryCover" src={"covers/" + entry.cover} alt="cover" height={coverSize} width={coverSize} />
+        <img className="libEntryCover" src={"static/covers/" + entry.cover} alt="cover" height={coverSize} width={coverSize} />
         <div className="libEntryMain">
           <div className="libEntryTitle">{entry.title}</div>
           {this.isChild ? "" : 
@@ -170,9 +170,11 @@ class LibEntry extends React.Component {
           <div className="libEntryRating libEntryDetails">{this.getRating()}</div>
           <div className="libEntryDuration libEntryDetails">{formatDuration(duration)}</div>
           <div className="libEntryButtons libEntryDetails">
+            {/*
             <button className="libEntryButton libEntryFavourite">
               <img className="libFavButtonImage" src="/favourite.svg" alt="favourite" height={20} width={20} />
             </button>
+            */}
             <button className="libEntryButton libEntryPlay">
               Play
             </button>
@@ -328,7 +330,7 @@ class LibSeriesEntry extends React.Component {
         this.setState({ extended: !this.state.extended });
       }}>
         <div className="libEntry" >
-          <img className="libEntryCover" src={"covers/" + this.getCover()} alt="cover" height={138} width={138} />
+          <img className="libEntryCover" src={"static/covers/" + this.getCover()} alt="cover" height={138} width={138} />
           <div className="libEntryMain">
             <div className="libEntryTitle">{this.getName()}</div>
             <div className="libEntryAuthor libEntryDetails">
