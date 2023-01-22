@@ -32,6 +32,8 @@ class LibMenu extends React.Component {
         };
 
         this.myList = React.createRef();
+
+        window.resetApp = this.reset.bind(this);
     }
 
     getLibrary() {
@@ -142,6 +144,17 @@ class LibMenu extends React.Component {
 
         return false ^ inverted;
 
+    }
+
+    reset() {
+        this.setState({
+            type: MenuType.ALL,
+            categories: [],
+            subcategories: [],
+            search: ''
+        });
+
+        this.myList.current.reset();
     }
 
 

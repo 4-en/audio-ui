@@ -176,15 +176,20 @@ class LibEntry extends React.Component {
             </button>
             */}
             <button className="libEntryButton libEntryPlay" onClick={
-              () => { 
+              (e) => { 
                 let payload = {
                   type: "CLICK",
                   name: "playButton",
                   title: entry.title,
                   series: entry.series,
-                  categories: entry.category
+                  categories: entry.category,
+                  entryType: entry.type,
+                  author: entry.author
                 }
                 this.props.callback(payload); 
+
+                // stop event from propagating to parent
+                e.stopPropagation();
               }
             }>
               Play
@@ -408,6 +413,13 @@ class LibList extends React.Component {
     };
 
     //this.state.sortMode = document.querySelector(".libMenuSorter").value;
+  }
+
+  reset() {
+    this.setState({
+      sortMode: SortMode.NAME,
+      sortAsc: false
+    });
   }
 
   setSortMode(event) {

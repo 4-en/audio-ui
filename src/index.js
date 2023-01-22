@@ -18,7 +18,6 @@ const testCallback = (payload) => {
   for (var i = 0; i < listeners.length; i++) {
     listeners[i](payload);
   }
-  console.log("callback: " + payload);
 };
 
 
