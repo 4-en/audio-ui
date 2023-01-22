@@ -175,7 +175,18 @@ class LibEntry extends React.Component {
               <img className="libFavButtonImage" src="/favourite.svg" alt="favourite" height={20} width={20} />
             </button>
             */}
-            <button className="libEntryButton libEntryPlay">
+            <button className="libEntryButton libEntryPlay" onClick={
+              () => { 
+                let payload = {
+                  type: "CLICK",
+                  name: "playButton",
+                  title: entry.title,
+                  series: entry.series,
+                  categories: entry.category
+                }
+                this.props.callback(payload); 
+              }
+            }>
               Play
             </button>
           </div>
@@ -321,7 +332,7 @@ class LibSeriesEntry extends React.Component {
     let entryComponents = [];
     let key = 0;
     for (let entry of entries) {
-      entryComponents.push(<LibEntry entry={entry} key={key} libMenu={this.props.libMenu} isChild={true} />);
+      entryComponents.push(<LibEntry entry={entry} key={key} callback={this.props.callback} libMenu={this.props.libMenu} isChild={true} />);
       key++;
     }
 
@@ -445,7 +456,7 @@ class LibList extends React.Component {
     let entries = [];
     let i = 0;
     for (let entry of lib) {
-      entries.push(<LibEntry entry={entry} key={i} libMenu={this.props.libMenu} />);
+      entries.push(<LibEntry entry={entry} key={i} callback={this.props.callback} libMenu={this.props.libMenu} />);
       i++;
     }
 
@@ -508,7 +519,7 @@ class LibList extends React.Component {
     let i = 0;
     for (let s of keys) {
       let e = series[s];
-      entries.push(<LibSeriesEntry series={s} entries={e} key={i} libMenu={this.props.libMenu} />);
+      entries.push(<LibSeriesEntry series={s} entries={e} callback={this.props.callback} key={i} libMenu={this.props.libMenu} />);
       i++;
     }
 
