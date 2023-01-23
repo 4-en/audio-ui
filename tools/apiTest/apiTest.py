@@ -3,7 +3,34 @@ import json
 
 app = fastapi.FastAPI()
 
-# ok response
+def addScore(userid, score):
+    # read score file
+    scores = []
+    with open("scores.txt", "r") as f:
+        for line in f.readlines():
+            line = line.strip()
+            if line == "":
+                continue
+            id, s = line.split("=")
+            scores.append((id, int(s)))
+    
+    # add score
+    entry = (userid, score)
+    scores.append(entry)
+
+    # sort scores
+    scores.sort(key=lambda x: x[1], reverse=True)
+
+    # write scores
+    with open("scores.txt", "w") as f:
+        for id, s in scores:
+            f.write(id + "=" + str(s) + "\n")
+    
+    # return rank
+    return scores.index(entry) + 1
+
+
+
 
 @app.get("/")
 def read_root(request, response):
@@ -34,8 +61,30 @@ def saveTest(request):
     with open("tests/" + data["userid"] + ".json", "w") as f:
         json.dump(data, f)
 
+    rank = -1
+    time = -1
+    # sum up the time
+    # ...
+    try:
+        rank = addScore(data["userid"], time)
+    except:
+        rank = -1
+
     # return success response
-    return {"message": "Data saved"}
+    return {"message": "Data saved",
+            "rank": rank}
+
+@app.get("/rank/")
+def rank(request):
+    # check for userid in request
+    if "userid" not in request.GET:
+        # return a bad request response
+        raise fastapi.HTTPException(status_code=400, detail="No userid provided")
+
+    # get the userid from the request
+    userid = request.GET["userid"]
+
+    
 
 # run the app
 if __name__ == "__main__":
