@@ -219,18 +219,19 @@ class Tester {
     this.totalDurationSeconds = totalTime;
     // get data as json
     let data = this.serialize();
-    console.log(data);
+    data = JSON.stringify(data);
 
     // send data to api
     // fetch async
-    fetch("http://audioui.eu.pythonanywhere.com/saveTest", {
+    fetch("https://audioui.eu.pythonanywhere.com/saveTest", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
       },
-      body: {
-        data: data
-      }
+      body: data
     }).then((response) => {
       console.log(response);
     }).catch((error) => {

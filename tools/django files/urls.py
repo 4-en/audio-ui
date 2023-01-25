@@ -18,6 +18,8 @@ from django.urls import path
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.template import loader
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 import json
 import os
 
@@ -25,15 +27,15 @@ def addScore(userid, score):
     # read score file
     scores = []
     # check if file exists
-    if os.path.exists("scores.txt"):
-        with open("scores.txt", "r") as f:
+    if os.path.exists("/home/audioui/audioui/audioui/scores.txt"):
+        with open("/home/audioui/audioui/audioui/scores.txt", "r") as f:
             for line in f.readlines():
                 line = line.strip()
                 if line == "":
                     continue
                 id, s = line.split("=")
                 scores.append((id, int(s)))
-    
+
     # add score
     entry = (userid, score)
     scores.append(entry)
@@ -42,10 +44,10 @@ def addScore(userid, score):
     scores.sort(key=lambda x: x[1], reverse=True)
 
     # write scores
-    with open("scores.txt", "w") as f:
+    with open("/home/audioui/audioui/audioui/scores.txt", "w") as f:
         for id, s in scores:
             f.write(id + "=" + str(s) + "\n")
-    
+
     # return rank
     return scores.index(entry) + 1
 
@@ -54,28 +56,22 @@ def webapp(request):
     context = {}
     return HttpResponse(template.render(context, request))
 
-def saveTest(request):
 
+@csrf_exempt
+def saveTest(request):
+    print("save start")
+    #return JsonResponse(request.POST)
     # check if the request is a POST request
     if request.method != "POST":
-        return HttpResponseBadRequest("Only POST requests are allowed")
+        return JsonResponse({"message":"not post"})
 
-    # check if request has a key data
-    if "data" not in request.POST:
-        return HttpResponseBadRequest("No data provided")
 
-    # get the data from the request
-    data = request.POST["data"]
-
-    # parse data as JSON
-    try:
-        data = json.loads(data)
-    except json.JSONDecodeError:
-        return HttpResponseBadRequest("Invalid JSON")
-
-    # check if the data has a key userid
+    data = json.loads(request.body)
     if "userid" not in data:
-        return HttpResponseBadRequest("No userid provided")
+        return JsonResponse({"message":"userid not found"})
+
+    userid = data["userid"]
+
 
     duration = data.get("totalDurationSeconds", -1)
     rank = -1
@@ -84,12 +80,13 @@ def saveTest(request):
 
 
     # save data in json file with name userid.json
-    with open("tests/" + data["userid"] + ".json", "w") as f:
+    with open("/home/audioui/audioui/audioui/tests/" + data["userid"] + ".json", "w") as f:
         json.dump(data, f)
+    print("Saving test")
 
     # return a response
 
-    return HttpResponse("Data saved")
+    return JsonResponse({"message":"Test received!","rank":rank ,"duration": duration})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
