@@ -167,7 +167,7 @@ class Tester {
       }
       return false;
      }));
-     this.tasks.push(new UserTask("Play best podcast", "Find and play the best rated podcast", (action) => { 
+     this.tasks.push(new UserTask("Play best podcast", "Find and play the highest rated podcast", (action) => { 
       if (action.type === ActionType.CLICK && action.name === "playButton" && action.title === "Giant Boasting") {
         return true;
       }
@@ -234,6 +234,8 @@ class Tester {
       body: data
     }).then((response) => {
       console.log(response);
+      let reply = response.json();
+
     }).catch((error) => {
       console.log(error);
     });
@@ -338,6 +340,10 @@ class Tester {
       } catch (e) {
         console.log("resetApp not defined");
       }
+      // scroll to top
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 100);
       // check if there are more tasks
       if (this.currentTask + 1 < this.tasks.length) {
         this.running = false;

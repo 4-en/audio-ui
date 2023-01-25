@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 import os
 import json
 import random
+import requests
+
+TESTFOLDER = "tests"
 
 def loadTest(folder: str) -> list:
     # check if folder exists
@@ -85,20 +88,44 @@ def getAvgTestTime(data: list) -> list:
     return testNames, times
 
 def getOS(data: list) -> list:
-    os = []
+    osdata = []
     for d in data:
-        os.append(d["os"])
-    return os
+        osdata.append(d["os"])
+    return osdata
+
+def downloadTest() -> list:
+    url = "https://audioui.eu.pythonanywhere.com/tests"
+    # request test data from server
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception("Could not download test data")
+    data = response.json()
+    return data.get("tests", [])
 
 def main():
-    # get folder with test data from user
-    folder = input("Enter test dir: ")
-    data = []
-    try:
-        data = loadTest(folder)
-    except Exception as e:
-        print(e)
+    # download test data from server
+    data = downloadTest()
+
+    if len(data) == 0:
+        print("No data available")
         return
+    else:
+        print("Downloaded", len(data), "tests")
+        # check if test folder exists
+        if not os.path.exists(TESTFOLDER):
+            os.mkdir(TESTFOLDER)
+        # clear test folder
+        for f in os.listdir(TESTFOLDER):
+            os.remove(os.path.join(TESTFOLDER, f))
+        # save new test data
+        for test in data:
+            name = test["userid"]+".json"
+            with open(os.path.join(TESTFOLDER, name), "w") as file:
+                json.dump(test, file)
+        
+
+    
+    print("Creating charts...")
 
     # make various charts and save them to disk
 
@@ -148,10 +175,10 @@ def main():
     plt.savefig("avgTestTime.png", dpi=300)
 
     # get os data
-    os = getOS(data)
+    osdata = getOS(data)
     osnames = []
     oscounts = []
-    for o in os:
+    for o in osdata:
         if o not in osnames:
             osnames.append(o)
             oscounts.append(1)
@@ -161,6 +188,8 @@ def main():
     plt.title("OS")
     plt.pie(oscounts, labels=osnames)
     plt.savefig("os.png", dpi=300)
+
+    print("Done")
 
 
 

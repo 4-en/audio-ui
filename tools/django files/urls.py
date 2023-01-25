@@ -34,14 +34,14 @@ def addScore(userid, score):
                 if line == "":
                     continue
                 id, s = line.split("=")
-                scores.append((id, int(s)))
+                scores.append((id, float(s)))
 
     # add score
     entry = (userid, score)
     scores.append(entry)
 
     # sort scores
-    scores.sort(key=lambda x: x[1], reverse=True)
+    scores.sort(key=lambda x: x[1], reverse=False)
 
     # write scores
     with open("/home/audioui/audioui/audioui/scores.txt", "w") as f:
@@ -55,6 +55,17 @@ def webapp(request):
     template = loader.get_template('index.html')
     context = {}
     return HttpResponse(template.render(context, request))
+
+def getTests(request):
+    # get all tests
+    tests = []
+    for file in os.listdir("/home/audioui/audioui/audioui/tests"):
+        if file.endswith(".json"):
+            with open("/home/audioui/audioui/audioui/tests/" + file, "r") as f:
+                tests.append(json.load(f))
+
+    # return tests
+    return JsonResponse({"tests":tests})
 
 
 @csrf_exempt
@@ -91,5 +102,6 @@ def saveTest(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", webapp, name='home'),
-    path("saveTest", saveTest)
+    path("saveTest", saveTest),
+    path("tests", getTests)
 ]
