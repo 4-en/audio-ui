@@ -23,7 +23,7 @@ class LibMenu extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            type: MenuType.ALL,
+            type: MenuType.AUDIOBOOKS,
             categories: [],
             subcategories: [],
             maxCategories: 5,
@@ -148,7 +148,7 @@ class LibMenu extends React.Component {
 
     reset() {
         this.setState({
-            type: MenuType.ALL,
+            type: MenuType.AUDIOBOOKS,
             categories: [],
             subcategories: [],
             search: ''

@@ -1,18 +1,21 @@
 import fastapi
 import json
+import os
 
 app = fastapi.FastAPI()
 
 def addScore(userid, score):
     # read score file
     scores = []
-    with open("scores.txt", "r") as f:
-        for line in f.readlines():
-            line = line.strip()
-            if line == "":
-                continue
-            id, s = line.split("=")
-            scores.append((id, int(s)))
+    # check if file exists
+    if os.path.exists("scores.txt"):
+        with open("scores.txt", "r") as f:
+            for line in f.readlines():
+                line = line.strip()
+                if line == "":
+                    continue
+                id, s = line.split("=")
+                scores.append((id, int(s)))
     
     # add score
     entry = (userid, score)

@@ -542,8 +542,11 @@ class LibList extends React.Component {
   getAuthorList() {
     let lib = this.props.library;
     let authors = [];
+    let entries = [];
 
-    return [];
+    entries.push(<div key={1}>WIP :)</div>);
+
+    return entries;
   }
 
   render() {

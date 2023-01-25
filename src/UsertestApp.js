@@ -65,7 +65,16 @@ class UserTask {
   }
 
   serialize() {
-    return JSON.stringify(this);
+    let obj = {
+      name: this.name,
+      task: this.task,
+      start: this.start,
+      end: this.end,
+      durationSeconds: this.durationSeconds,
+      entries: this.entries
+    };
+
+    return obj;
   }
 
 }
@@ -81,10 +90,51 @@ class Tester {
     this.running = false;
     this.finished = false;
 
+    this.totalDurationSeconds = 0;
+
+    this.device = "desktop";
+    // get device type
+    if (navigator.userAgent.indexOf("Mobile") !== -1) {
+      this.device = "mobile";
+    }
+    // get os
+    if (navigator.userAgent.indexOf("Windows") !== -1) {
+      this.os = "windows";
+    } else if (navigator.userAgent.indexOf("Mac") !== -1) {
+      this.os = "mac";
+    } else if (navigator.userAgent.indexOf("Linux") !== -1) {
+      this.os = "linux";
+    } else {
+      this.os = "unknown";
+    }
+
+    // adnroid or ios
+    if (navigator.userAgent.indexOf("Android") !== -1) {
+      this.os = "android";
+    } else if (navigator.userAgent.indexOf("iPhone") !== -1) {
+      this.os = "ios";
+    }
+
+    // get browser
+    if (navigator.userAgent.indexOf("Chrome") !== -1) {
+      this.browser = "chrome";
+    } else if (navigator.userAgent.indexOf("Firefox") !== -1) {
+      this.browser = "firefox";
+    } else if (navigator.userAgent.indexOf("Safari") !== -1) {
+      this.browser = "safari";
+    } else if (navigator.userAgent.indexOf("Edge") !== -1) {
+      this.browser = "edge";
+    } else if (navigator.userAgent.indexOf("Opera") !== -1) {
+      this.browser = "opera";
+    } else {
+      this.browser = "unknown";
+    }
+
+
     this.setText = setText;
     this.setButton = setButton;
 
-    this.formsUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdVMQ5gXZqCEEdCp3EwwfFmIYa19t1Kd4JXuki-udVeawdAtA/viewform?usp=sf_link";
+    this.formsUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdVMQ5gXZqCEEdCp3EwwfFmIYa19t1Kd4JXuki-udVeawdAtA/viewform?usp=pp_url";
 
     // create tasks
     this.tasks.push(new UserTask("Play LOTR1", "Find and play the title Lord of the Rings: The Fellowship of the Ring", (action) => { 
@@ -101,6 +151,24 @@ class Tester {
      }));
     this.tasks.push(new UserTask("Play Horror and Sci-Fi", "Find and play a horror and sci-fi title", (action) => { 
       if (action.type === ActionType.CLICK && action.name === "playButton" && action.categories.includes("horror") && action.categories.includes("sci-fi")) {
+        return true;
+      }
+      return false;
+     }));
+     this.tasks.push(new UserTask("Play Series Precise Flora and Zany Adaptation", "Find and play a title of the series \"Precise Flora and Zany Adaptation\"", (action) => { 
+      if (action.type === ActionType.CLICK && action.name === "playButton" && action.series === "Precise Flora and Zany Adaptation") {
+        return true;
+      }
+      return false;
+     }));
+     this.tasks.push(new UserTask("Play oldest western", "Find and play the oldest western title", (action) => { 
+      if (action.type === ActionType.CLICK && action.name === "playButton" && action.title === "Joshua Harris") {
+        return true;
+      }
+      return false;
+     }));
+     this.tasks.push(new UserTask("Play best podcast", "Find and play the best rated podcast", (action) => { 
+      if (action.type === ActionType.CLICK && action.name === "playButton" && action.title === "Giant Boasting") {
         return true;
       }
       return false;
@@ -143,6 +211,12 @@ class Tester {
   end() {
     this.running = false;
     this.finished = true;
+    // calc total time
+    let totalTime = 0;
+    for (let i = 0; i < this.tasks.length; i++) {
+      totalTime += this.tasks[i].durationSeconds;
+    }
+    this.totalDurationSeconds = totalTime;
     // get data as json
     let data = this.serialize();
     console.log(data);
@@ -152,8 +226,7 @@ class Tester {
     fetch("http://audioui.eu.pythonanywhere.com/saveTest", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+        "Content-Type": "application/json"
       },
       body: {
         data: data
@@ -165,7 +238,7 @@ class Tester {
     });
 
     // show link to google form
-    let formLink = this.formsUrl + "&entry.2005620554=" + this.userid
+    let formLink = this.formsUrl + "&entry.1277430276=" + this.userid
 
     // open form in new tab
     window.open(formLink, "_blank");
@@ -174,12 +247,18 @@ class Tester {
   serialize() {
     let data = {
       userid: this.userid,
-      tasks: []
+      tasks: [],
+      device: this.device,
+      os: this.os,
+      browser: this.browser,
+      totalDurationSeconds: this.totalDurationSeconds
     };
 
     for (let i = 0; i < this.tasks.length; i++) {
       data.tasks.push(this.tasks[i].serialize());
     }
+
+    console.log(data);
 
     return data;
   }
