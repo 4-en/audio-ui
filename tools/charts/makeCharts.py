@@ -93,6 +93,50 @@ def getOS(data: list) -> list:
         osdata.append(d["os"])
     return osdata
 
+def getBrowser(data: list) -> list:
+    browserdata = []
+    for d in data:
+        browserdata.append(d["browser"])
+    
+    # count occurences of each browser
+    browsers = []
+    counts = []
+    for b in browserdata:
+        if b not in browsers:
+            browsers.append(b)
+            counts.append(1)
+        else:
+            counts[browsers.index(b)] += 1
+    
+    # capitalize first letter of each browser
+    for i in range(len(browsers)):
+        browsers[i] = browsers[i].capitalize()
+
+    return browsers, counts
+
+def getHardestTask(data: list) -> list:
+    taskNames = []
+    counts = []
+
+    for i, t in enumerate(data[0]["tasks"]):
+        taskNames.append("Task " + str(i + 1))
+        counts.append(0)
+
+    for d in data:
+        # find task with longest duration
+        longest = 0
+        task = None
+        for i, t in enumerate(d["tasks"]):
+            if float(t["durationSeconds"]) > longest:
+                longest = float(t["durationSeconds"])
+                task = i
+        
+        counts[task] += 1
+
+    
+
+    return taskNames, counts
+
 def downloadTest() -> list:
     url = "https://audioui.eu.pythonanywhere.com/tests"
     # request test data from server
@@ -188,6 +232,23 @@ def main():
     plt.title("OS")
     plt.pie(oscounts, labels=osnames)
     plt.savefig("os.png", dpi=300)
+
+    # get browser data
+    browsers, counts = getBrowser(data)
+    plt.clf()
+    plt.title("Browser")
+    plt.pie(counts, labels=browsers)
+    plt.savefig("browser.png", dpi=300)
+
+    # hardest task
+    taskNames, counts = getHardestTask(data)
+    plt.clf()
+    plt.title("Hardest Task")
+    plt.xlabel("Task")
+    plt.ylabel("Count")
+    plt.bar(taskNames, counts)
+    plt.savefig("hardestTask.png", dpi=300)
+
 
     print("Done")
 
