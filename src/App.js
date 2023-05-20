@@ -2,27 +2,12 @@ import './reset.css';
 import './style.css';
 import LibMenu from './LibMenu';
 import React from 'react';
+import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
+import Navbar from './Navbar';
+import Home from './Home';
+import Login from './Login';
+import Store from './Store';
 
-
-// load library from json file
-//const library = require('./library.json');
-
-
-
-/*
-  library structure:
-
-  Title
-  Menu
-
-  Entry 1
-  Entry 2
-  Entry 3
-  Entry 4
-  ...
-
-
-*/
 
 /*
   Library entry structure:
@@ -53,7 +38,7 @@ class App extends React.Component {
     this.state = {
       library: this.props.library
     };
-    
+
     this.myMenu = React.createRef();
 
   }
@@ -64,11 +49,24 @@ class App extends React.Component {
 
 
   render() {
+
+    let home = <Home library={this} />;
+
+
     return (
-      <div className="Library" onClick={() => { /*userModeToggle();*/ }}>
-        <LibMenu library={this} callback={this.props.callback} ref={this.myMenu} stateChanger={()=>{ this.filterUpdate(); }}/>
-  
-      </div>
+
+      <Router>
+        <Navbar library={this} />
+        <div className="Library" onClick={() => { /*userModeToggle();*/ }}>
+          <Routes>
+            <Route path="/" element={home} />
+            <Route path="/library" element={<LibMenu library={this} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
+            <Route path="/login" element={<Login library={this} />} />
+            <Route path="/store" element={<Store library={this} />} />
+          </Routes>
+        </div>
+      </Router>
+
     );
   }
 }

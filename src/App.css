@@ -1,16 +1,3 @@
-.Library {
-  /* base div for all library components */
-  /*text-align: center;*/
-  background-color: #282c34;
-  max-width: 1200px;
-  width: 90vw;
-  /* rounded corners */
-  border-radius: 10px;
-  min-height: 500px;
-  padding: 20px;
-
-}
-
 
 
 .App-header {

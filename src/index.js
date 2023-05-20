@@ -11,7 +11,7 @@ async function loadLibrary() {
   return data;
 }
 
-const TESTMODE = true;
+const TESTMODE = false;
 
 var listeners = [];
 const testCallback = (payload) => {
