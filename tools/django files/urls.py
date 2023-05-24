@@ -23,6 +23,14 @@ from django.http import JsonResponse
 import json
 import os
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 def addScore(userid, score):
     # read score file
     scores = []
@@ -82,6 +90,13 @@ def saveTest(request):
         return JsonResponse({"message":"userid not found"})
 
     userid = data["userid"]
+
+    ip = "unknown"
+    try:
+        ip = get_client_ip(request)
+    except:
+        pass
+    data["ip"] = ip
 
 
     duration = data.get("totalDurationSeconds", -1)

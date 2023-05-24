@@ -137,6 +137,12 @@ def getHardestTask(data: list) -> list:
 
     return taskNames, counts
 
+def getHistByTask(data: list, task: int) -> list:
+    times = []
+    for d in data:
+        times.append(float(d["tasks"][task]["durationSeconds"]))
+    return times
+
 def downloadTest() -> list:
     url = "https://audioui.eu.pythonanywhere.com/tests"
     # request test data from server
@@ -217,6 +223,16 @@ def main():
     testNames, times = getAvgTestTime(data)
     plt.bar(testNames, times)
     plt.savefig("avgTestTime.png", dpi=300)
+
+    # histogram for task 3
+    times = getHistByTask(data, 2)
+    plt.clf()
+    plt.title("Task 3")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Count")
+    plt.hist(times, bins=10)
+    plt.savefig("task3Hist.png", dpi=300)
+    
 
     # get os data
     osdata = getOS(data)
