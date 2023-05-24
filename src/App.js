@@ -1,5 +1,7 @@
 import './reset.css';
 import './style.css';
+import './navbar.css';
+import './library.css';
 import LibMenu from './LibMenu';
 import React from 'react';
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
@@ -7,6 +9,7 @@ import Navbar from './Navbar';
 import Home from './Home';
 import Login from './Login';
 import Store from './Store';
+import AdminStore from './AdminStore';
 
 
 /*
@@ -57,12 +60,13 @@ class App extends React.Component {
 
       <Router>
         <Navbar library={this} />
-        <div className="Library" onClick={() => { /*userModeToggle();*/ }}>
+        <div className="AudioUI">
           <Routes>
             <Route path="/" element={home} />
             <Route path="/library" element={<LibMenu library={this} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
             <Route path="/login" element={<Login library={this} />} />
             <Route path="/store" element={<Store library={this} />} />
+            <Route path="/admin" element={<AdminStore library={this} />} />
           </Routes>
         </div>
       </Router>
