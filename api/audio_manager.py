@@ -8,9 +8,21 @@ class IAudioManager:
         self.userStates = {}
 
     # database functions to be implemented by child classes
-    def create_user(self, username: str, passhash: str, salt: str, email: str, balance:int, admin: bool) -> dict:
+    def _create_user(self, username: str, passhash: str, salt: str, email: str, balance:int, admin: bool) -> dict:
         """
         Create user
+        """
+        raise NotImplementedError
+    
+    def edit_user(self, user_id: int, username: str, passhash: str, salt: str, email: str, balance:int, admin: bool) -> bool:
+        """
+        Edit user
+        """
+        raise NotImplementedError
+    
+    def delete_user(self, user_id: int) -> bool:
+        """
+        Delete user
         """
         raise NotImplementedError
     
@@ -38,7 +50,7 @@ class IAudioManager:
         """
         raise NotImplementedError
     
-    def get_user_library(self, user_id: int) -> list:
+    def _get_user_library(self, user_id: int) -> list:
         """
         Get user library by user id
         """
@@ -61,6 +73,50 @@ class IAudioManager:
         Create store item
         """
         raise NotImplementedError
+    
+    def edit_store_item(self, item_id: int, name: str, price: int, description: str) -> bool:
+        """
+        Edit store item
+        """
+        raise NotImplementedError
+    
+    def delete_store_item(self, item_id: int) -> bool:
+        """
+        Delete store item
+        """
+        raise NotImplementedError
+    
+    def create_author(self, first_name: str, last_name: str) -> dict:
+        """
+        Create author
+        """
+        raise NotImplementedError
+    
+    def edit_author(self, author_id: int, first_name: str, last_name: str) -> bool:
+        """
+        Edit author
+        """
+        raise NotImplementedError
+    
+    def delete_author(self, author_id: int) -> bool:
+        """
+        Delete author
+        """
+        raise NotImplementedError
+    
+    def get_author_by_id(self, author_id: int) -> dict:
+        """
+        Get author by author id
+        """
+        raise NotImplementedError
+    
+    def get_author_by_name(self, first_name: str, last_name: str) -> dict:
+        """
+        Get author by name
+        """
+        raise NotImplementedError
+    
+    
     
 
     
