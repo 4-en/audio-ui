@@ -29,10 +29,10 @@ class User:
         return hashlib.sha512((password + salt).encode()).hexdigest()
 
     @classmethod
-    def create_new(cls, username:str, password:str, email:str, balance:int=10000):
+    def create_new(cls, username:str, password:str, email:str, balance:int=10000, admin:bool=False):
         salt = uuid.uuid4().hex
         passhash = cls.get_password_hash(password, salt)
-        return cls(-1, username, passhash, salt, email, "no_session", 0, int(time.time()), balance, False)
+        return cls(-1, username, passhash, salt, email, "no_session", 0, int(time.time()), balance, admin)
     
     def check_password(self, password:str):
         return self.passhash == self.get_password_hash(password, self.salt)

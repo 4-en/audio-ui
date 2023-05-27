@@ -9,6 +9,12 @@ class AbstractAudioManager:
         self.userStates = {}
 
     # database functions to be implemented by child classes
+    def _save(self):
+        """
+        Save changes before shutdown
+        """
+        pass
+
     def _create_user(self, user:User) -> User:
         """
         Create user
@@ -157,7 +163,7 @@ class AbstractAudioManager:
             self.userStates[user_id] = 0
         return self.userStates[user_id]
     
-    def login(self, username: str, password: str) -> User:
+    def login(self, username: str, password: str) -> dict:
         """
         Login
         Returns user with session id if successful
@@ -178,7 +184,7 @@ class AbstractAudioManager:
             user.extend_session()
             self._update_session_id(user.user_id, user.session_id, user.session_timeout)
 
-        return user
+        return user.to_dict()
     
     def logout(self, session_id) -> bool:
         """
@@ -194,12 +200,15 @@ class AbstractAudioManager:
         self.notify_user_change(user.user_id)
         return True
     
-    def register(self, username: str, password: str, email:str):
+    def register(self, username: str, password: str, email:str) -> dict:
         """
         Register
         """
         user = User.create_new(username, password, email, balance=20000)
-        return self._create_user(user)
+        user = self._create_user(user)
+        if user is None:
+            return None
+        return user.to_dict()
     
     def _get_user_library_by_id(self, user_id: int) -> list:
         """
@@ -333,7 +342,7 @@ class AbstractAudioManager:
         if not self.is_admin(session_id):
             return False
         
-        ret =  self._create_store_item(item)
+        ret = self._create_store_item(item)
         if ret is False:
             return False
         self.notify_store_change()
@@ -369,12 +378,4 @@ class AbstractAudioManager:
         self.notify_store_change()
         return True
     
-
-
-
-    
-    
-    
-
-
 
