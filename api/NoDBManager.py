@@ -1,5 +1,5 @@
 from audio_manager import AbstractAudioManager
-from audiotypes import AudioContent, Author, User, UserContent
+from audiotypes import AudioContent, Author, User, UserContent, AudioType
 import json
 
 class NoDBManager(AbstractAudioManager):
@@ -32,6 +32,8 @@ class NoDBManager(AbstractAudioManager):
         l = []
         with open(path, "r") as f:
             l = json.load(f)
+
+        getType = lambda x: AudioType.Audiobook if x == "audiobook" else AudioType.Podcast if x == "podcast" else 2
         
         for item in l:
             author_name = item["author"].split(" ")
@@ -40,11 +42,12 @@ class NoDBManager(AbstractAudioManager):
             
             audioContent = AudioContent(
                 -1,
+                getType(item["type"]),
                 item["title"],
                 author.author_id,
-                item["categories"],
+                item["category"],
                 item["series"],
-                sum([c.duration for c in item["chapters"]])
+                sum([c["duration"] for c in item["chapters"]]),
                 item["rating"],
                 int(item["price"]*100),
                 item["cover"],
@@ -127,6 +130,24 @@ class NoDBManager(AbstractAudioManager):
         """
         return [userContent for userContent in self.userItems.values() if userContent.user_id == user_id]
     
+    def _edit_user_item(self, user_content:UserContent) -> bool:
+        """
+        Edit user item
+        """
+        if not self._get_user_item_by_id(user_content.user_content_id):
+            return False
+        self.userItems[user_content.user_content_id] = user_content
+        return True
+
+    def _delete_user_item(self, user_content_id: int) -> bool:
+        """
+        Delete user item
+        """
+        if not self._get_user_item_by_id(user_content_id):
+            return False
+        del self.userItems[user_content_id]
+        return True
+
     def get_store_library(self) -> list:
         """
         Get store library
