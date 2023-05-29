@@ -1,6 +1,7 @@
 # contains backend logic for audio manager
 import hashlib
 from audiotypes import User, AudioContent, Author, UserContent
+import time
 
 class AbstractAudioManager:
 
@@ -93,7 +94,7 @@ class AbstractAudioManager:
         """
         raise NotImplementedError
     
-    def _edit_store_item(self, audioContent:AudioContent) -> bool:
+    def _edit_store_item(self, audioContent:AudioContent) -> AudioContent:
         """
         Edit store item
         """
@@ -175,6 +176,15 @@ class AbstractAudioManager:
             self.userStates[user_id] = 0
         return self.userStates[user_id]
 
+    def get_user_state_by_session_id(self, session_id: str) -> int:
+        """
+        Get user state by session id
+        """
+        user = self._get_user_by_session_id(session_id)
+        if user is None:
+            return None
+        return self.get_user_state(user.user_id)
+
     def get_user_by_session_id(self, session_id: str) -> dict:
         """
         Get user by session id
@@ -184,7 +194,14 @@ class AbstractAudioManager:
             return None
         if not user.check_session(session_id):
             return None
-        return user.to_dict()
+        return self._join_user_and_state(user.to_dict())
+    
+    def _join_user_and_state(self, user: dict) -> dict:
+        """
+        Join user and state
+        """
+        user["state"] = self.get_user_state(user["user_id"])
+        return user
     
     def login(self, username: str, password: str) -> dict:
         """
@@ -207,7 +224,7 @@ class AbstractAudioManager:
             user.extend_session()
             self._update_session_id(user.user_id, user.session_id, user.session_timeout)
 
-        return user.to_dict()
+        return self._join_user_and_state(user.to_dict())
     
     def logout(self, session_id) -> bool:
         """
@@ -231,7 +248,7 @@ class AbstractAudioManager:
         user = self._create_user(user)
         if user is None:
             return None
-        return user.to_dict()
+        return self._join_user_and_state(user.to_dict())
     
     def _get_user_library_by_id(self, user_id: int) -> list:
         """
@@ -269,6 +286,27 @@ class AbstractAudioManager:
         if user is None or user.check_session(session_id) is False:
             return None
         return self._get_user_library_by_id(user.user_id)
+
+    def get_user_item_by_session_id(self, session_id: str, item_id: int) -> dict:
+        """
+        Get user item by session id and item id
+        """
+        user = self._get_user_by_session_id(session_id)
+        if user is None or user.check_session(session_id) is False:
+            return None
+        item = self._get_user_item(user.user_id, item_id)
+        if item is None:
+            return None
+        store_item = self.get_store_item_by_id(item.content_id)
+        if store_item is None:
+            return None
+        return {
+            "user_rating": item.rating,
+            "progress": item.progress,
+            "purchased": item.purchased,
+            "last_played": item.last_played,
+            **store_item.to_dict()
+        }
     
     def is_admin(self, session_id: str) -> bool:
         """
@@ -353,11 +391,29 @@ class AbstractAudioManager:
         self._edit_user_item(user_content)
         self.notify_user_change(user.user_id)
         return True
+
+    def play_item(self, session_id: str, item_id: int) -> str:
+        """
+        Play item
+        Returns url to static audio file
+        """
+        user = self._get_user_by_session_id(session_id)
+        if user is None or user.check_session(session_id) is False:
+            return None
+        user_content = self._get_user_item(user.user_id, item_id)
+        if user_content is None:
+            return None
+        # normally we would get the url from the server
+        user_content.last_played = int(time.time())
+        self._edit_user_item(user_content)
+        self.notify_user_change(user.user_id)
+        return "https://dorar.at/LARGE/PuretuneMp3/73lbS7hNl1pwN3Tch56zYg/1685383200/201405/171.mp3"
+    
     
 
     ### admin functions
     ### always check if user is admin before calling these functions
-    def create_store_item(self, session_id: str, item: AudioContent) -> bool:
+    def create_store_item(self, session_id: str, item: AudioContent) -> dict:
         """
         Create store item
         Returns true if successful
@@ -366,26 +422,101 @@ class AbstractAudioManager:
         if not self.is_admin(session_id):
             return False
         
-        ret = self._create_store_item(item)
-        if ret is False:
-            return False
+        new_item = self._create_store_item(item)
+        if new_item is None:
+            return None
         self.notify_store_change()
-        return True
+        return new_item.to_dict()
     
-    def update_store_item(self, session_id: str, item: AudioContent) -> bool:
+    def create_store_item_with_author(
+        self,
+        session_id: str,
+        audio_type: int,
+        title: str,
+        author_id: int|None,
+        author_first_name: str|None,
+        author_last_name: str|None,
+        author_bio: str|None,
+        categories: str,
+        series: str,
+        duration: int,
+        rating: float,
+        price: int,
+        cover_file: str,
+        releaseDate: int,
+        series_index: int
+    ) -> dict:
+        # check if user is admin
+        if not self.is_admin(session_id):
+            return None
+        
+        # create author if necessary
+        author = None
+        if author_id is not None:
+            author = self.get_author_by_id(author_id)
+        if author is None:
+            if author_first_name is None or author_last_name is None:
+                return None
+            bio = "no bio"
+            if author_bio is not None:
+                bio = author_bio
+            author = Author(-1, author_first_name, author_last_name, bio)
+            author = self._create_author(author)
+            if author is None:
+                return None
+            
+        # create store item
+        item = AudioContent(
+            -1,
+            audio_type,
+            title,
+            author.author_id,
+            categories,
+            series,
+            duration,
+            rating,
+            price,
+            cover_file,
+            releaseDate,
+            int(time.time()),
+            series_index
+        )
+        return self.create_store_item(session_id, item)
+            
+        
+    
+    def update_store_item(self, session_id: str, item: AudioContent) -> dict:
         """
         Update store item
-        Returns true if successful
+        Returns new item if successful
         """
         # check if user is admin
         if not self.is_admin(session_id):
-            return False
+            return None
         
-        ret = self._edit_store_item(item)
-        if ret is False:
-            return False
+        newItem = self._edit_store_item(item)
+        if newItem is None:
+            return None
         self.notify_store_change()
-        return True
+        return newItem.to_dict()
+    
+    def update_store_item_from_changes(self, session_id: str, item_id: int, changes: dict) -> dict:
+        """
+        Update store item from changes
+        Returns new item if successful
+        """
+        # check if user is admin
+        if not self.is_admin(session_id):
+            return None
+        
+        item = self.get_store_item_by_id(item_id)
+        if item is None:
+            return None
+        for key in changes:
+            if key in item.to_dict():
+                setattr(item, key, changes[key])
+        return self.update_store_item(session_id, item)
+        
     
     def delete_store_item(self, session_id: str, item_id: int) -> bool:
         """
@@ -401,5 +532,6 @@ class AbstractAudioManager:
             return False
         self.notify_store_change()
         return True
+
     
 

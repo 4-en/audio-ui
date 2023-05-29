@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from audio_manager import AbstractAudioManager
 import uvicorn
 import time
+from audiotypes import AudioContent
+import asyncio
 
 
 origins = [
@@ -37,6 +39,37 @@ class BuyRequest(BaseModel):
     session_id: str
     item_id: int
 
+class PlayRequest(BaseModel):
+    session_id: str
+    item_id: int
+
+class CreateItemRequest(BaseModel):
+    session_id: str
+    item_audio_type: int
+    item_title: str
+    item_author_id: int | None
+    item_author_first_name: str | None
+    item_author_last_name: str | None
+    item_author_bio: str | None
+    item_categories: list[str]
+    item_series: str | None
+    item_duration: int
+    item_rating: float
+    item_price: int
+    item_cover_file: str
+    item_release_date: int
+    item_series_index: int | None
+
+class EditItemRequest(BaseModel):
+    session_id: str
+    item_id: int
+    changes: dict
+
+
+class PlayResponse(BaseModel):
+    item: dict
+    audio_url: str
+
 class StatusResponse(BaseModel):
     status: bool
     message: str
@@ -53,6 +86,13 @@ class ItemResponse(BaseModel):
 
 class ItemListResponse(BaseModel):
     items: list
+
+class UserStateRequest(BaseModel):
+    state: int = -1
+    session_id: str
+
+class StateResponse(BaseModel):
+    state: int = -1
 
 
 class AudioAPI:
@@ -157,5 +197,90 @@ class AudioAPI:
             if res is False:
                 raise HTTPException(status_code=400, detail="Item not found")
             return StatusResponse(status=True, message="Item bought")
+        
+        # "plays" item with session id and item id
+        # since this is a demo, we just check if the user owns the item
+        # and mark last_played as now, then return url to static audio file
+        @self.app.post("/play/")
+        async def play(play_request: PlayRequest) -> PlayResponse:
+            url = self.audioManager.play_item(play_request.session_id, play_request.item_id)
+            if url is None:
+                raise HTTPException(status_code=401, detail="Invalid session id")
+            
+            item = self.audioManager.get_user_item_by_session_id(play_request.session_id, play_request.item_id)
+            if item is None:
+                raise HTTPException(status_code=400, detail="Item not found")
+            return PlayResponse(item=item, audio_url=url)
+        
+        @self.app.post("/store_state/")
+        async def store_state(state_request: StateResponse) -> StateResponse:
+            # use long polling to wait for state change
+            # get store state
+            state = self.audioManager.get_store_state()
+            max_tries = 60
+            while state == state_request.state and max_tries > 0:
+                # poll every second
+                await asyncio.sleep(1.0)
+                state = self.audioManager.get_store_state()
+                max_tries -= 1
+            return StateResponse(state=state)
+            
+        
+        @self.app.post("/user_state/")
+        async def user_state(state_request: UserStateRequest) -> StateResponse:
+            # use long polling to wait for state change
+            # get user state
+            user = self.audioManager.get_user_by_session_id(state_request.session_id)
+            if user is None:
+                raise HTTPException(status_code=401, detail="Invalid session id")
+            max_tries = 60
+            state = self.audioManager.get_user_state(user["user_id"])
+            while state == state_request.state and max_tries > 0:
+                # poll every second
+                await asyncio.sleep(1.0)
+                state = self.audioManager.get_user_state(user["user_id"])
+                max_tries -= 1
+            return StateResponse(state=state)
+
+
+
+        @self.app.post("/create_item/")
+        async def create_item(create_item_request: CreateItemRequest) -> ItemResponse:
+            item = self.audioManager.create_store_item_with_author(
+                create_item_request.session_id,
+                create_item_request.item_audio_type,
+                create_item_request.item_title,
+                create_item_request.item_author_id,
+                create_item_request.item_author_first_name,
+                create_item_request.item_author_last_name,
+                create_item_request.item_author_bio,
+                create_item_request.item_categories,
+                create_item_request.item_series,
+                create_item_request.item_duration,
+                create_item_request.item_rating,
+                create_item_request.item_price,
+                create_item_request.item_cover_file,
+                create_item_request.item_release_date,
+                create_item_request.item_series_index
+            )
+            if item is None:
+                raise HTTPException(status_code=401, detail="Invalid session id")
+            return ItemResponse(item=item)
+        
+        @self.app.post("/edit_item/")
+        async def edit_item(edit_item_request: EditItemRequest) -> ItemResponse:
+            edit = self.audioManager.update_store_item_from_changes(
+                edit_item_request.session_id,
+                edit_item_request.item_id,
+                edit_item_request.changes
+            )
+            if edit is None:
+                raise HTTPException(status_code=401, detail="Invalid session id")
+            
+            return ItemResponse(item=edit)
+
+
+
+            
 
 

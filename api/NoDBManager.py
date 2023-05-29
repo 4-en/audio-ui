@@ -169,14 +169,14 @@ class NoDBManager(AbstractAudioManager):
         self.store[audioContent.content_id] = audioContent
         return audioContent
     
-    def _edit_store_item(self, audioContent:AudioContent) -> bool:
+    def _edit_store_item(self, audioContent:AudioContent) -> AudioContent:
         """
         Edit store item
         """
         if not self._get_store_item_by_id(audioContent.content_id):
-            return False
+            return None
         self.store[audioContent.content_id] = audioContent
-        return True
+        return audioContent
     
     def _delete_store_item(self, item_id: int) -> bool:
         """
