@@ -164,13 +164,13 @@ class NoDBManager(AbstractAudioManager):
         del self.userItems[user_content_id]
         return True
 
-    def get_store_library(self) -> list:
+    def _get_store_library(self) -> list:
         """
         Get store library
         """
         return list(self.store.values())
     
-    def get_store_item_by_id(self, item_id: int) -> AudioContent:
+    def _get_store_item_by_id(self, item_id: int) -> AudioContent:
         """
         Get store item by item id
         """

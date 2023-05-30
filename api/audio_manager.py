@@ -76,13 +76,13 @@ class AbstractAudioManager:
         """
         raise NotImplementedError
     
-    def get_store_library(self) -> list:
+    def _get_store_library(self) -> list:
         """
         Get store library
         """
         raise NotImplementedError
     
-    def get_store_item_by_id(self, item_id: int) -> AudioContent:
+    def _get_store_item_by_id(self, item_id: int) -> AudioContent:
         """
         Get store item by item id
         """
@@ -184,6 +184,39 @@ class AbstractAudioManager:
         if user is None:
             return None
         return self.get_user_state(user.user_id)
+    
+    def get_store_library(self) -> list:
+        """
+        Get store library
+        """
+        library = self._get_store_library()
+
+        # get authors
+        authors = {}
+        for item in library:
+            author_id = item.author_id
+            if author_id not in authors:
+                authors[author_id] = self.get_author_by_id(author_id)
+            item.author = authors[author_id].to_dict()
+            del item.author_id
+        return library
+
+    
+    def get_store_item_by_id(self, item_id: int) -> AudioContent:
+        """
+        Get store item by item id
+        """
+        item = self._get_store_item_by_id(item_id)
+
+        if item is None:
+            return None
+        
+        # get author
+        author = self.get_author_by_id(item.author_id)
+        
+        item.author = author.to_dict()
+        del item.author_id
+        return item
 
     def get_user_by_session_id(self, session_id: str) -> dict:
         """
@@ -261,6 +294,7 @@ class AbstractAudioManager:
         if store_content is None:
             return None
         user_library = []
+        authors = {}
         store_i = 0
         for item in user_content:
             # find corresponding store item
@@ -275,17 +309,29 @@ class AbstractAudioManager:
                     "last_played": item.last_played,
                     **store_content[store_i].to_dict()
                 }
+
+                if "author_id" in audio_user_content:
+                    author_id = audio_user_content["author_id"]
+                    if author_id not in authors:
+                        author = self.get_author_by_id(author_id)
+                        if author is None:
+                            authors[author_id] = None
+                        else:
+                            authors[author_id] = author.to_dict()
+                    del audio_user_content["author_id"]
+                    audio_user_content["author"] = authors[author_id]
+
                 user_library.append(audio_user_content)
         return user_library
     
-    def get_user_library_by_session_id(self, session_id: str) -> list:
+    def get_user_library_by_session_id(self, session_id: str) -> tuple(int, list):
         """
         Get user library by session id
         """
         user = self._get_user_by_session_id(session_id)
         if user is None or user.check_session(session_id) is False:
             return None
-        return self._get_user_library_by_id(user.user_id)
+        return self.get_user_state(user.user_id), self._get_user_library_by_id(user.user_id)
 
     def get_user_item_by_session_id(self, session_id: str, item_id: int) -> dict:
         """

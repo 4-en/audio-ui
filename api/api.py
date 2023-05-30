@@ -85,6 +85,7 @@ class ItemResponse(BaseModel):
     item: dict
 
 class ItemListResponse(BaseModel):
+    state: int = -1
     items: list
 
 class UserStateRequest(BaseModel):
@@ -130,9 +131,7 @@ class AudioAPI:
             break
         print("Shutting down...")
         self.audioManager._save()
-
-
-                    
+          
 
     def create_routes(self):
         # Routes
@@ -176,17 +175,20 @@ class AudioAPI:
         # get user library with session id
         @self.app.post("/library/")
         async def library(auth_request: AuthRequest) -> ItemListResponse:
-            library = self.audioManager.get_user_library_by_session_id(auth_request.session_id)
+            state, library = self.audioManager.get_user_library_by_session_id(auth_request.session_id)
             if library is None:
                 raise HTTPException(status_code=401, detail="Invalid session id")
-            return ItemListResponse(items=library)
+            
+            return ItemListResponse(items=library, state=state)
+        
         # get store library
         @self.app.get("/store/")
         async def store() -> ItemListResponse:
             store = self.audioManager.get_store_library()
             if store is None:
                 raise HTTPException(status_code=500, detail="Internal server error")
-            return ItemListResponse(items=store)
+            state = self.audioManager.get_store_state()
+            return ItemListResponse(items=store, state=state)
 
         # buy item with session id and item id
         @self.app.post("/buy/")
