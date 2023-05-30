@@ -1,6 +1,7 @@
 from audio_manager import AbstractAudioManager
 from audiotypes import AudioContent, Author, User, UserContent, AudioType
 import json
+import random
 
 class NoDBManager(AbstractAudioManager):
 
@@ -14,8 +15,8 @@ class NoDBManager(AbstractAudioManager):
         self.next_item_id = 0
         self.next_author_id = 0
         self.next_user_item_id = 0
-        self.create_test_users()
         self.load_json_library()
+        self.create_test_users()
 
     def create_test_users(self):
         user1 = User.create_new("Bob", "1234", "bob@example.com")
@@ -23,10 +24,25 @@ class NoDBManager(AbstractAudioManager):
         user3 = User.create_new("User", "1234", "user@example.com")
         admin = User.create_new("Admin", "1234", "admin@example.com", admin=True)
 
+        for user in [user1, user2, user3, admin]:
+            user.create_new_session()
+
         self._create_user(user1)
         self._create_user(user2)
         self._create_user(user3)
         self._create_user(admin)
+
+        # create user items
+        for i in range(0, 3):
+            session_id = self.users[i].session_id
+            s = set()
+            for _ in range(0, random.randint(5, 20)):
+                s.add(random.randint(0, len(self.store)-1))
+            for item_id in s:
+                self.buy_item(session_id, item_id)
+
+
+
 
     def load_json_library(self, path: str = "library.json"):
         l = []

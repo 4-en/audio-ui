@@ -5,12 +5,16 @@ import App from './App';
 import UsertestApp from './UsertestApp';
 import reportWebVitals from './reportWebVitals';
 
+/*
+* old function to load static library for user testing
 async function loadLibrary() {
   const response = await fetch('static/library.json');
   const data = await response.json();
   return data;
 }
+*/
 
+// enable/disable user testing mode
 const TESTMODE = false;
 
 var listeners = [];
@@ -25,24 +29,22 @@ const testCallback = (payload) => {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 const testroot = ReactDOM.createRoot(document.getElementById('testroot'));
 
-// read library from json file
-loadLibrary().then((data) => {
-  root.render(
+
+root.render(
+  <React.StrictMode>
+    <App callback={testCallback} />
+  </React.StrictMode>
+);
+
+if (TESTMODE) {
+  testroot.render(
     <React.StrictMode>
-      <App library={data} callback={testCallback}/>
+      <UsertestApp listeners={listeners} />
     </React.StrictMode>
   );
+}
 
-  if (TESTMODE) {
-    testroot.render(
-      <React.StrictMode>
-        <UsertestApp listeners={listeners}/>
-      </React.StrictMode>
-    );
-  }
 
-  
-});
 
 
 

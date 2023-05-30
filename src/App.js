@@ -38,16 +38,49 @@ import AdminStore from './AdminStore';
 class App extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      library: this.props.library
+      user: null
     };
 
     this.myMenu = React.createRef();
 
   }
 
-  getLibrary() {
-    return this.state.library;
+  getAPIAddress() {
+    return "http://localhost:3456";
+  }
+
+  async apiRequest(endpoint, method, body) {
+    let url = this.getAPIAddress() + endpoint;
+    let options = {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+    let response = await fetch(url, options);
+    return response;
+  }
+
+  async sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async login(username, password) {
+    const response = await this.apiRequest("/login", "POST", { username: username, password: password });
+    const data = await response.json();
+    console.log(data);
+    if (response.status === 200) {
+      this.setState({ user: data.user });
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
 
@@ -63,10 +96,10 @@ class App extends React.Component {
         <div className="AudioUI">
           <Routes>
             <Route path="/" element={home} />
-            <Route path="/library" element={<LibMenu library={this} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
-            <Route path="/login" element={<Login library={this} />} />
-            <Route path="/store" element={<Store library={this} />} />
-            <Route path="/admin" element={<AdminStore library={this} />} />
+            <Route path="/library" element={<LibMenu app={this} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
+            <Route path="/login" element={<Login app={this} />} />
+            <Route path="/store" element={<Store app={this} />} />
+            <Route path="/admin" element={<AdminStore app={this} />} />
           </Routes>
         </div>
       </Router>

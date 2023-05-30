@@ -28,7 +28,8 @@ class LibMenu extends React.Component {
             subcategories: [],
             maxCategories: 5,
             maxSubcategories: 5,
-            search: ''
+            search: '',
+            library: []
         };
 
         this.myList = React.createRef();
@@ -36,8 +37,42 @@ class LibMenu extends React.Component {
         window.resetApp = this.reset.bind(this);
     }
 
+    async testLogin() {
+        const username = 'Bob';
+        const password = '1234';
+
+        const res = await this.props.app.login(username, password);
+
+        if (res) {
+            // wait
+            this.loadLibrary();
+        }
+
+    }
+
+    async loadLibrary() {
+        const data = {
+            session_id: this.props.app.state.user.session_id
+        };
+        const res = await this.props.app.apiRequest('/library', 'POST', data);
+        const json = await res.json();
+        this.setState({ library: json.items });
+    }
+
+    async componentDidMount() {
+        // load library if logged in
+        if (this.props.app.state.user !== null) {
+            await(this.loadLibrary());
+        }
+
+        // use long polling to update library
+        //TODO: add long polling
+    }
+
+
     getLibrary() {
-        return this.props.library.getLibrary();
+        console.log(this.state.library);
+        return this.state.library;
     }
 
     filterClick(type) {
@@ -112,30 +147,23 @@ class LibMenu extends React.Component {
         }
 
 
-
         // check if search is in title
         if (entry['title'].toLowerCase().includes(search)) {
             return true ^ inverted;
         }
 
         // check if search is in author
-        if (entry['author'].toLowerCase().includes(search)) {
+        if (false && entry['author'].toLowerCase().includes(search)) {
             return true ^ inverted;
         }
 
         // check if search is in category
-        for (let cat of entry['category']) {
+        for (let cat of entry['categories']) {
             if (cat.toLowerCase().includes(search)) {
                 return true ^ inverted;
             }
         }
 
-        // check if search is in subcategory
-        for (let subcat of entry['subcategory']) {
-            if (subcat.toLowerCase().includes(search)) {
-                return true ^ inverted;
-            }
-        }
 
         // check if search is in series
         if (entry['series'].toLowerCase().includes(search)) {
@@ -190,12 +218,12 @@ class LibMenu extends React.Component {
 
                 switch (this.state.type) {
                     case MenuType.AUDIOBOOKS:
-                        if (entry.type !== "audiobook") {
+                        if (entry.audio_type !== 0) {
                             continue mainLoop;
                         }
                         break;
                     case MenuType.PODCASTS:
-                        if (entry.type !== "podcast") {
+                        if (entry.audio_type !== 1) {
                             continue mainLoop;
                         }
                         break;
@@ -213,7 +241,7 @@ class LibMenu extends React.Component {
             // filter by categories
             if (this.state.categories.length > 0)
                 for (let cat of this.state.categories) {
-                    if (!entry.category.includes(cat)) {
+                    if (!entry.categories.includes(cat)) {
                         continue mainLoop;
                     }
                 }
@@ -273,6 +301,16 @@ class LibMenu extends React.Component {
         // get filtered library
         let library = this.getFilteredLibrary();
 
+        if (this.props.app.state.user === null) {
+            return (
+                <div>
+                    <button className="al-button" onClick={async () => {
+                        await this.testLogin();
+                    }}> Login </button>
+                    </div>
+            );
+        }
+
 
         // ordered list of categories by number of entries
         // create map of categories and subcategories
@@ -282,8 +320,7 @@ class LibMenu extends React.Component {
         // count categories and subcategories
         for (let i = 0; i < library.length; i++) {
             let entry = library[i];
-            let cats = entry['category'];
-            let subcats = entry['subcategory'];
+            let cats = entry['categories'];
 
             for (let cat of cats) {
                 if (categories[cat] === undefined) {
@@ -292,18 +329,11 @@ class LibMenu extends React.Component {
                 categories[cat]++;
             }
 
-            for (let subcat of subcats) {
-                if (subcategories[subcat] === undefined) {
-                    subcategories[subcat] = 0;
-                }
-                subcategories[subcat]++;
-            }
         }
 
 
         // sort categories by number of entries
         let sortedCategories = Object.keys(categories).sort(function (a, b) { return categories[b] - categories[a]; });
-        let sortedSubcategories = Object.keys(subcategories).sort(function (a, b) { return subcategories[b] - subcategories[a]; });
 
 
 
@@ -325,17 +355,6 @@ class LibMenu extends React.Component {
             }}> {catName} </button>);
         }
 
-        // create subcategory buttons
-        let subcategoryButtons = [];
-        for (let i = 0; i < sortedSubcategories.length && i < this.state.maxSubcategories; i++) {
-            let subcat = sortedSubcategories[i];
-            let className = 'al-button subcategory-button ' + catSelected(subcat, this.state.subcategories);
-            let subcatName = subcat.charAt(0).toUpperCase() + subcat.slice(1);
-            subcategoryButtons.push(<button className={className} key={i} onClick={() => {
-                this.subcatClick(subcat);
-                this.props.callback({ type: 'CLICK', name: "subcategoryButton", value: subcat });
-            }}> {subcatName} </button>);
-        }
 
 
         return (
@@ -369,9 +388,6 @@ class LibMenu extends React.Component {
                     </div>
                     <div className="libMenuCategoryBar">
                         {categoryButtons}
-                    </div>
-                    <div className="libMenuSubcategoryBar">
-                        {subcategoryButtons}
                     </div>
 
 

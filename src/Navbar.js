@@ -5,9 +5,6 @@ import { userModeToggle } from './dark-light-toggle';
 class Navbar extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            library: this.props.library
-        };
     }
 
     render() {

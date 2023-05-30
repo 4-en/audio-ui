@@ -4,9 +4,6 @@ import { Link } from 'react-router-dom';
 class AdminStore extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            library: this.props.library
-        };
     }
 
     render() {

@@ -4,9 +4,6 @@ import { Link } from 'react-router-dom';
 class Store extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            library: this.props.library
-        };
     }
 
     render() {

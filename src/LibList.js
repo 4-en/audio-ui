@@ -81,10 +81,7 @@ class LibEntry extends React.Component {
   getStatus() {
     let entry = this.props.entry;
 
-    let duration = 0;
-    for (let chapter of entry.chapters) {
-      duration += chapter.duration;
-    }
+    let duration = this.getDuration();
 
     let status = ListenStatus.NOT_STARTED;
     if (entry.progress > duration * 0.05) {
@@ -98,10 +95,7 @@ class LibEntry extends React.Component {
 
   getDuration() {
     let entry = this.props.entry;
-    let duration = 0;
-    for (let chapter of entry.chapters) {
-      duration += chapter.duration;
-    }
+    let duration = entry.duration;
 
     return duration;
   }
@@ -127,7 +121,7 @@ class LibEntry extends React.Component {
 
 
     let key = 0;
-    let sortedCategories = entry.category.sort();
+    let sortedCategories = entry.categories.sort();
     let addComma = () => { return key++ < sortedCategories.length - 1; };
     let categories = sortedCategories.map((category) => {
       return <span className="libEntryCategory libEntryDetails" key={key++}>
@@ -145,7 +139,7 @@ class LibEntry extends React.Component {
         // add class extended to libEntry
         e.target.classList.toggle("extended");
       }}>
-        <img className="libEntryCover" src={"static/covers/" + entry.cover} alt="cover" height={coverSize} width={coverSize} />
+        <img className="libEntryCover" src={"static/covers/" + entry.cover_file} alt="cover" height={coverSize} width={coverSize} />
         <div className="libEntryMain">
           <div className="libEntryTitle">{entry.title}</div>
           {this.isChild ? "" : 
@@ -235,7 +229,7 @@ class LibSeriesEntry extends React.Component {
   getCover() {
     // return cover of first entry
     let entries = this.getEntries();
-    return entries[0].cover;
+    return entries[0].cover_file;
   }
 
   getAuthor() {
@@ -292,9 +286,7 @@ class LibSeriesEntry extends React.Component {
     let entries = this.getEntries();
     let duration = 0;
     for (let entry of entries) {
-      for (let chapter of entry.chapters) {
-        duration += chapter.duration;
-      }
+      duration += entry.duration;
     }
     return duration;
   }
@@ -304,7 +296,7 @@ class LibSeriesEntry extends React.Component {
     let entries = this.getEntries();
     let categories = {};
     for (let entry of entries) {
-      for (let category of entry.category) {
+      for (let category of entry.categories) {
         if (!(category in categories)) {
           categories[category] = 1;
         } else {
