@@ -145,7 +145,7 @@ class LibEntry extends React.Component {
           {this.isChild ? "" : 
           <div className="libEntryAuthor libEntryDetails">
             <span>by </span>
-            <span className="libEntryLink" onClick={() => { this.props.libMenu.setSearch(entry.author); }}>{entry.author}</span>
+            <span className="libEntryLink" onClick={() => { this.props.libMenu.setSearch(entry.author.first_name + " " + entry.author.last_name); }}>{entry.author.first_name + " " + entry.author.last_name}</span>
           </div>
           }
           {this.showSeries() ?
@@ -236,6 +236,14 @@ class LibSeriesEntry extends React.Component {
     // return author of first entry
     let entries = this.getEntries();
     return entries[0].author;
+  }
+
+  getAuthorName() {
+    // return author of first entry
+    let entries = this.getEntries();
+    let author = entries[0].author;
+    let name = author["first_name"] + " " + author["last_name"];
+    return name;
   }
 
   getStatus() {
@@ -345,7 +353,7 @@ class LibSeriesEntry extends React.Component {
               <span>by </span>
               <span className="libEntryLink" onClick={(e) => { 
                 e.stopPropagation();
-                this.props.libMenu.setSearch(this.getAuthor()); }}>{this.getAuthor()}</span>
+                this.props.libMenu.setSearch(this.getAuthorName()); }}>{this.getAuthorName()}</span>
             </div>
 
             <div className="libEntryDate libEntryDetails">{formatDate(this.getReleaseDate())}</div>

@@ -153,7 +153,8 @@ class LibMenu extends React.Component {
         }
 
         // check if search is in author
-        if (false && entry['author'].toLowerCase().includes(search)) {
+        let authorName = entry.author.first_name + ' ' + entry.author.last_name;
+        if (authorName.toLowerCase().includes(search)) {
             return true ^ inverted;
         }
 

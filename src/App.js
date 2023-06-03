@@ -92,7 +92,7 @@ class App extends React.Component {
     return (
 
       <Router>
-        <Navbar library={this} />
+        <Navbar app={this} />
         <div className="AudioUI">
           <Routes>
             <Route path="/" element={home} />

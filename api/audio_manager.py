@@ -190,19 +190,20 @@ class AbstractAudioManager:
         Get store library
         """
         library = self._get_store_library()
+        library = [item.to_dict() for item in library]
 
         # get authors
         authors = {}
         for item in library:
-            author_id = item.author_id
+            author_id = item["author_id"]
             if author_id not in authors:
                 authors[author_id] = self.get_author_by_id(author_id)
-            item.author = authors[author_id].to_dict()
-            del item.author_id
+            item["author"] = authors[author_id].to_dict()
+            del item["author_id"]
         return library
 
     
-    def get_store_item_by_id(self, item_id: int) -> AudioContent:
+    def get_store_item_by_id(self, item_id: int) -> dict:
         """
         Get store item by item id
         """
@@ -213,9 +214,10 @@ class AbstractAudioManager:
         
         # get author
         author = self.get_author_by_id(item.author_id)
-        
-        item.author = author.to_dict()
-        del item.author_id
+
+        item = item.to_dict()
+        item["author"] = author.to_dict()
+        del item["author_id"]
         return item
 
     def get_user_by_session_id(self, session_id: str) -> dict:
@@ -298,7 +300,7 @@ class AbstractAudioManager:
         store_i = 0
         for item in user_content:
             # find corresponding store item
-            while store_i < len(store_content) and store_content[store_i].content_id != item.content_id:
+            while store_i < len(store_content) and store_content[store_i]["content_id"] != item.content_id:
                 store_i += 1
             if store_i < len(store_content):
                 # create user library item
@@ -307,7 +309,7 @@ class AbstractAudioManager:
                     "progress": item.progress,
                     "purchased": item.purchased,
                     "last_played": item.last_played,
-                    **store_content[store_i].to_dict()
+                    **store_content[store_i]
                 }
 
                 if "author_id" in audio_user_content:
@@ -324,7 +326,7 @@ class AbstractAudioManager:
                 user_library.append(audio_user_content)
         return user_library
     
-    def get_user_library_by_session_id(self, session_id: str) -> tuple(int, list):
+    def get_user_library_by_session_id(self, session_id: str) -> tuple[int, list]:
         """
         Get user library by session id
         """
@@ -351,7 +353,7 @@ class AbstractAudioManager:
             "progress": item.progress,
             "purchased": item.purchased,
             "last_played": item.last_played,
-            **store_item.to_dict()
+            **store_item
         }
     
     def is_admin(self, session_id: str) -> bool:
@@ -385,11 +387,11 @@ class AbstractAudioManager:
         store_item = self.get_store_item_by_id(item_id)
         if store_item is None:
             return False
-        if store_item.price > user.balance:
+        if store_item["price"] > user.balance:
             return False
-        user.balance -= store_item.price
+        user.balance -= store_item["price"]
         self._edit_user(user)
-        user_content = UserContent.create_new(user.user_id, store_item.content_id)
+        user_content = UserContent.create_new(user.user_id, store_item["content_id"])
         self._create_user_item(user_content)
         self.notify_user_change(user.user_id)
         return True
