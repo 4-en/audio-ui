@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import LibMenu from './LibMenu';
 
 class Store extends React.Component {
     constructor(props) {
@@ -9,11 +10,11 @@ class Store extends React.Component {
     render() {
         return (
             <div className="Store">
-                <p>
+                <div className="store_header">
                     Hello World!
                     This is the store page.
-                </p>
-                <Link to="/library">Library</Link>
+                </div>
+                <LibMenu isStore={true} app={this.props.app}/>
             </div>
         );
     }

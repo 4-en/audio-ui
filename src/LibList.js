@@ -57,6 +57,41 @@ function formatDate(date) {
   return day + "." + month + "." + year;
 }
 
+class StorePanel extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className="rightPanel">
+        <div className="rightPanelTitle">Title</div>
+        <div className="rightPanelContent">
+          Content
+        </div>
+      </div>
+    );
+  }
+}
+
+class LibraryPanel extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className="rightPanel">
+        <div className="rightPanelTitle">Title</div>
+        <div className="rightPanelContent">
+          Content
+        </div>
+      </div>
+    );
+  }
+}
+
+
 // create react component
 class LibEntry extends React.Component {
   constructor(props) {
@@ -110,6 +145,13 @@ class LibEntry extends React.Component {
     return formatRating(rating);
   }
 
+  getAuthorName() {
+    let entry = this.props.entry;
+    let author = entry.author;
+    let name = author["first_name"] + " " + author["last_name"];
+    return name; 
+  }
+
 
   render() {
     let entry = this.props.entry;
@@ -145,7 +187,7 @@ class LibEntry extends React.Component {
           {this.isChild ? "" : 
           <div className="libEntryAuthor libEntryDetails">
             <span>by </span>
-            <span className="libEntryLink" onClick={() => { this.props.libMenu.setSearch(entry.author.first_name + " " + entry.author.last_name); }}>{entry.author.first_name + " " + entry.author.last_name}</span>
+            <span className="libEntryLink" onClick={() => { this.props.libMenu.setSearch(this.getAuthorName()); }}>{this.getAuthorName()}</span>
           </div>
           }
           {this.showSeries() ?
@@ -159,16 +201,13 @@ class LibEntry extends React.Component {
           <div className="libEntryDescription libEntryDetails">{entry.description}</div>
         </div>
         <div className="libEntryRight">
-
+          {this.isStore ? <StorePanel entry={entry}/> : <LibraryPanel entry={entry}/>}
+          {/*
           <div className="libEntryStatus libEntryDetails">{status}</div>
           <div className="libEntryRating libEntryDetails">{this.getRating()}</div>
           <div className="libEntryDuration libEntryDetails">{formatDuration(duration)}</div>
           <div className="libEntryButtons libEntryDetails">
-            {/*
-            <button className="libEntryButton libEntryFavourite">
-              <img className="libFavButtonImage" src="/favourite.svg" alt="favourite" height={20} width={20} />
-            </button>
-            */}
+            
             <button className="libEntryButton libEntryPlay" onClick={
               (e) => { 
                 let payload = {
@@ -189,6 +228,7 @@ class LibEntry extends React.Component {
               Play
             </button>
           </div>
+          */}
         </div>
       </div>
     );
@@ -337,8 +377,16 @@ class LibSeriesEntry extends React.Component {
     let entryComponents = [];
     let key = 0;
     for (let entry of entries) {
-      entryComponents.push(<LibEntry entry={entry} key={key} callback={this.props.callback} libMenu={this.props.libMenu} isChild={true} />);
+      entryComponents.push(<LibEntry isStore={this.props.isStore} entry={entry} key={key} callback={this.props.callback} libMenu={this.props.libMenu} isChild={true} />);
       key++;
+    }
+
+    if (entries.length === 0) {
+      return (<div></div>);
+    }
+
+    if (entries.length === 1) {
+      return (<LibEntry isStore={this.props.isStore} entry={entries[0]} key={key} callback={this.props.callback} libMenu={this.props.libMenu} />);
     }
 
     return (
@@ -348,7 +396,7 @@ class LibSeriesEntry extends React.Component {
         <div className="libEntry" >
           <img className="libEntryCover" src={"static/covers/" + this.getCover()} alt="cover" height={138} width={138} />
           <div className="libEntryMain">
-            <div className="libEntryTitle">{this.getName()}</div>
+            <div className="libEntryTitle">{"Series: " + this.getName()}</div>
             <div className="libEntryAuthor libEntryDetails">
               <span>by </span>
               <span className="libEntryLink" onClick={(e) => { 
@@ -362,12 +410,11 @@ class LibSeriesEntry extends React.Component {
           </div>
           <div className="libEntryRight">
 
-            <div className="libEntryStatus libEntryDetails">{this.getStatus()}</div>
+            {/*<div className="libEntryStatus libEntryDetails">{this.getStatus()}</div>*/}
             <div className="libEntryRating libEntryDetails">{this.getRating()}</div>
             <div className="libEntryDuration libEntryDetails">{formatDuration(this.getDuration())}</div>
             <div className="libEntryButtons libEntryDetails">
-              
-              
+              {entries.length + (entries.length > 1 ? " titles" : " title")}
             </div>
           </div>
 
@@ -468,7 +515,7 @@ class LibList extends React.Component {
     let entries = [];
     let i = 0;
     for (let entry of lib) {
-      entries.push(<LibEntry entry={entry} key={i} callback={this.props.callback} libMenu={this.props.libMenu} />);
+      entries.push(<LibEntry isStore={this.props.isStore} entry={entry} key={i} callback={this.props.callback} libMenu={this.props.libMenu} />);
       i++;
     }
 
@@ -531,7 +578,7 @@ class LibList extends React.Component {
     let i = 0;
     for (let s of keys) {
       let e = series[s];
-      entries.push(<LibSeriesEntry series={s} entries={e} callback={this.props.callback} key={i} libMenu={this.props.libMenu} />);
+      entries.push(<LibSeriesEntry isStore={this.props.isStore} series={s} entries={e} callback={this.props.callback} key={i} libMenu={this.props.libMenu} />);
       i++;
     }
 

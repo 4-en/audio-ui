@@ -37,17 +37,10 @@ class LibMenu extends React.Component {
         window.resetApp = this.reset.bind(this);
     }
 
-    async testLogin() {
-        const username = 'Bob';
-        const password = '1234';
-
-        const res = await this.props.app.login(username, password);
-
-        if (res) {
-            // wait
-            this.loadLibrary();
-        }
-
+    isStore() {
+        // check if this menu is for the store
+        // false if store is not in props
+        return this.props.isStore !== undefined;
     }
 
     async loadLibrary() {
@@ -59,7 +52,20 @@ class LibMenu extends React.Component {
         this.setState({ library: json.items });
     }
 
+    async loadStore() {
+        const res = await this.props.app.apiRequest('/store', 'GET');
+        const json = await res.json();
+        this.setState({ library: json.items });
+    }
+
     async componentDidMount() {
+
+        // load store if this is the store menu
+        if (this.isStore()) {
+            await(this.loadStore());
+            return;
+        }
+
         // load library if logged in
         if (this.props.app.state.user !== null) {
             await(this.loadLibrary());
@@ -71,7 +77,7 @@ class LibMenu extends React.Component {
 
 
     getLibrary() {
-        console.log(this.state.library);
+        //console.log(this.state.library);
         return this.state.library;
     }
 
@@ -302,16 +308,6 @@ class LibMenu extends React.Component {
         // get filtered library
         let library = this.getFilteredLibrary();
 
-        if (this.props.app.state.user === null) {
-            return (
-                <div>
-                    <button className="al-button" onClick={async () => {
-                        await this.testLogin();
-                    }}> Login </button>
-                    </div>
-            );
-        }
-
 
         // ordered list of categories by number of entries
         // create map of categories and subcategories
@@ -362,7 +358,7 @@ class LibMenu extends React.Component {
             <div>
                 <div className="libMenu">
                     <div className="libMenuTitleBar">
-                        <h1 className="libMenuTitle">Library</h1>
+                        <h1 className="libMenuTitle">{this.isStore()? "Store" : "Library"}</h1>
                         <input className="libMenuSearch" type="text" placeholder="Search" value={this.state.search} onChange={(event) => {
                             this.searchChange(event);
                             this.props.callback({ type: "KEY", name: "searchFieldInput", value: event.target.value });
@@ -393,7 +389,7 @@ class LibMenu extends React.Component {
 
 
                 </div>
-                <LibList callback={this.props.callback} library={library} libMenu={this} ref={this.myList} />
+                <LibList isStore={this.isStore()} callback={this.props.callback} library={library} libMenu={this} ref={this.myList} />
             </div>
         );
     }
