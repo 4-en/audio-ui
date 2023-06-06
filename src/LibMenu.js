@@ -298,7 +298,7 @@ class LibMenu extends React.Component {
             }
             filterButtons.push(<button className={className} key={i} onClick={() => {
                 this.filterClick(MenuType[type]);
-                this.props.callback({ type: "CLICK", name: "typeButton", value: type });
+                //this.props.callback({ type: "CLICK", name: "typeButton", value: type });
             }}> {MenuType[type]} </button>);
             i++;
         }
@@ -389,6 +389,7 @@ class LibMenu extends React.Component {
 
 
                 </div>
+                
                 <LibList isStore={this.isStore()} callback={this.props.callback} library={library} libMenu={this} ref={this.myList} />
             </div>
         );

@@ -34,6 +34,11 @@ function formatDuration(duration) {
   return formatted;
 }
 
+function getPriceString(price) {
+  price = price/100;
+  return price.toFixed(2) + "€";
+}
+
 function formatRating(rating) {
   let stars = [];
   for (let i = 0; i < 5; i++) {
@@ -49,12 +54,47 @@ function formatRating(rating) {
 
 function formatDate(date) {
   // formats date from ctime to dd.mm.yyyy
-  let d = new Date(date*1000);
+  let d = new Date(date * 1000);
   let day = d.getDate();
   let month = d.getMonth() + 1;
   let year = d.getFullYear();
 
   return day + "." + month + "." + year;
+}
+
+class ContentRating extends React.Component {
+  constructor(props) {
+    super(props);
+    this.rating = 0;
+    if ("rating" in props) {
+      this.rating = props.rating;
+    }
+    this.symbol = "★";
+    if ("symbol" in props) {
+      this.symbol = props.symbol;
+    }
+
+  }
+
+  render() {
+    let rating = this.rating;
+    const stars = [];
+    for (let i = 0; i < 5; i++) {
+      if (rating > 0) {
+        stars.push(<span className="libEntryStar" key={i}>{this.symbol}</span>);
+      } else {
+        stars.push(<span className="libEntryNoStar" key={i}>{this.symbol}</span>);
+      }
+      rating--;
+    }
+    // eg 4.5 ★★★★
+    return (
+      <div className="contentRating">
+        <span className="contentRatingNumber">{this.rating.toFixed(1)} </span>
+        <span className="contentRatingStars">{stars}</span>
+      </div>
+    );
+  }
 }
 
 class StorePanel extends React.Component {
@@ -63,12 +103,48 @@ class StorePanel extends React.Component {
   }
 
   render() {
+    const duration = formatDuration(this.props.entry.duration);
+    const rating = this.props.entry.rating;
+    const price = getPriceString(this.props.entry.price);
+
     return (
       <div className="rightPanel">
-        <div className="rightPanelTitle">Title</div>
-        <div className="rightPanelContent">
-          Content
+        <div className="rightPanelTop">
+          {/*
+          - Rating
+          - Duration
+          - Buy button (with price) or grayed out if already owned with "Owned" text
+          */}
+          <div className="rightPanelRating">
+            <ContentRating rating={rating} />
+          </div>
+          <div className="rightPanelDuration">{duration}</div>
+
         </div>
+        <div className="rightPanelBottom">
+          <div className="rightPanelBuy">
+            <button className="rightPanelBuyButton">Buy for {price}</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+class ProgressBar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.progress = 0;
+    if ("progress" in props) {
+      this.progress = props.progress;
+    }
+    this.progress = 30;
+  }
+
+  render() {
+    return (
+      <div className='progressOuter'>
+        <div className='progressInner' style={{ width: this.progress + '%' }}></div>
       </div>
     );
   }
@@ -80,11 +156,40 @@ class LibraryPanel extends React.Component {
   }
 
   render() {
+    const rating = this.props.entry.rating;
+    const progress = this.props.entry.progress;
+    let status = ListenStatus.NOT_STARTED;
+    if (progress > 0.05) {
+      status = ListenStatus.IN_PROGRESS;
+      if (progress > 0.95) {
+        status = ListenStatus.COMPLETED;
+      }
+    }
+
+    const durationLeft = formatDuration(this.props.entry.duration * (1 - progress));
+
     return (
       <div className="rightPanel">
-        <div className="rightPanelTitle">Title</div>
-        <div className="rightPanelContent">
-          Content
+        <div className="rightPanelTop">
+          {/*
+          - Status
+          - Rating
+          - Duration
+          - Progress bar
+          */}
+          <div className="rightPanelRating">
+            <ContentRating rating={rating} />
+          </div>
+          <div className="rightPanelStatus">{status}</div>
+          <ProgressBar progress={progress * 100} />
+          
+          <div className="rightPanelDuration">Remaining: {durationLeft}</div>
+
+        </div>
+        <div className="rightPanelBottom">
+          <div className="rightPanelPlay">
+            <button className="rightPanelPlayButton">Play</button>
+          </div>
         </div>
       </div>
     );
@@ -149,7 +254,7 @@ class LibEntry extends React.Component {
     let entry = this.props.entry;
     let author = entry.author;
     let name = author["first_name"] + " " + author["last_name"];
-    return name; 
+    return name;
   }
 
 
@@ -184,24 +289,24 @@ class LibEntry extends React.Component {
         <img className="libEntryCover" src={"static/covers/" + entry.cover_file} alt="cover" height={coverSize} width={coverSize} />
         <div className="libEntryMain">
           <div className="libEntryTitle">{entry.title}</div>
-          {this.isChild ? "" : 
-          <div className="libEntryAuthor libEntryDetails">
-            <span>by </span>
-            <span className="libEntryLink" onClick={() => { this.props.libMenu.setSearch(this.getAuthorName()); }}>{this.getAuthorName()}</span>
-          </div>
+          {this.isChild ? "" :
+            <div className="libEntryAuthor libEntryDetails">
+              <span>by </span>
+              <span className="libEntryLink" onClick={() => { this.props.libMenu.setSearch(this.getAuthorName()); }}>{this.getAuthorName()}</span>
+            </div>
           }
           {this.showSeries() ?
-          <div className="libEntrySeries libEntryDetails">
-            <span>Series: </span>
-            <span className="libEntryLink" onClick={() => { this.props.libMenu.setSearch(entry.series); }}>{entry.series}</span>
-          </div>
-          : ""}
+            <div className="libEntrySeries libEntryDetails">
+              <span>Series: </span>
+              <span className="libEntryLink" onClick={() => { this.props.libMenu.setSearch(entry.series); }}>{entry.series}</span>
+            </div>
+            : ""}
           <div className="libEntryDate libEntryDetails">{formatDate(entry.releaseDate)}</div>
           <div className="libEntryCategories libEntryDetails">{categories}</div>
           <div className="libEntryDescription libEntryDetails">{entry.description}</div>
         </div>
         <div className="libEntryRight">
-          {this.isStore ? <StorePanel entry={entry}/> : <LibraryPanel entry={entry}/>}
+          {this.props.isStore ? <StorePanel entry={entry} /> : <LibraryPanel entry={entry} />}
           {/*
           <div className="libEntryStatus libEntryDetails">{status}</div>
           <div className="libEntryRating libEntryDetails">{this.getRating()}</div>
@@ -358,9 +463,10 @@ class LibSeriesEntry extends React.Component {
     categories = Object.keys(categories);
     for (let category of categories) {
       catCompontents.push(<span className="libEntryCategory libEntryDetails" key={key}>
-        <span className="libEntryLink" onClick={(e) => { 
+        <span className="libEntryLink" onClick={(e) => {
           e.stopPropagation();
-          this.props.libMenu.catClick(category); }}>
+          this.props.libMenu.catClick(category);
+        }}>
           {category}
         </span>
         {key < categories.length - 1 ? ", " : ""}
@@ -399,14 +505,15 @@ class LibSeriesEntry extends React.Component {
             <div className="libEntryTitle">{"Series: " + this.getName()}</div>
             <div className="libEntryAuthor libEntryDetails">
               <span>by </span>
-              <span className="libEntryLink" onClick={(e) => { 
+              <span className="libEntryLink" onClick={(e) => {
                 e.stopPropagation();
-                this.props.libMenu.setSearch(this.getAuthorName()); }}>{this.getAuthorName()}</span>
+                this.props.libMenu.setSearch(this.getAuthorName());
+              }}>{this.getAuthorName()}</span>
             </div>
 
             <div className="libEntryDate libEntryDetails">{formatDate(this.getReleaseDate())}</div>
             <div className="libEntryCategories libEntryDetails">{this.getCategories()}</div>
-            { this.state.extended ? "" : <div className="libEntryDetails libEntryExpandText"><h3>Click to view titles</h3></div>}
+            {this.state.extended ? "" : <div className="libEntryDetails libEntryExpandText"><h3>Click to view titles</h3></div>}
           </div>
           <div className="libEntryRight">
 

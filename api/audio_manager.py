@@ -422,6 +422,8 @@ class AbstractAudioManager:
         user_content.rating = rating
         self._edit_user_item(user_content)
         self.notify_user_change(user.user_id)
+
+        # TODO: recalculate store item rating and notify store change
         return True
     
     def update_progress(self, session_id: str, item_id: int, progress: int) -> bool:

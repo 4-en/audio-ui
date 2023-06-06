@@ -17,13 +17,16 @@ import AdminStore from './AdminStore';
 
   entry = {
                 "title": faker.sentence(nb_words=3),
-                "author": author,
+                "author": {
+                    "first_name": faker.first_name(),
+                    "last_name": faker.last_name(),
+                    "bio": faker.paragraph(nb_sentences=3),
+                }
                 "category": [category],
-                "subcategory": [subcategory],
                 "series": series,
                 "type": type,
                 "description": faker.paragraph(nb_sentences=3),
-                "chapters": clist,
+                "duration": random.randint(1, 1000),
                 "rating": random.random() * 4 + 1,
                 "price": round( random.random() * 20 + 5.99, 2),
                 "cover": ""
