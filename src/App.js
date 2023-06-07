@@ -58,8 +58,13 @@ class App extends React.Component {
     let url = this.getAPIAddress() + endpoint;
     let options = {
       method: method,
+      // CORS Access-Control-Allow-Origin
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
+        
       }
     };
     if (body) {

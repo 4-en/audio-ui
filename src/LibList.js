@@ -35,7 +35,7 @@ function formatDuration(duration) {
 }
 
 function getPriceString(price) {
-  price = price/100;
+  price = price / 100;
   return price.toFixed(2) + "€";
 }
 
@@ -100,15 +100,121 @@ class ContentRating extends React.Component {
 class StorePanel extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      owned: false,
+      loggedIn: false
+    };
+
+    this.entry = null;
+    if ("entry" in props) {
+      this.entry = props.entry;
+    }
+
+    this.user = null;
+    this.userLibrary = null;
+    if ("libMenu" in props) {
+      this.userLibrary = props.libMenu.state.userLibrary;
+      this.user = props.libMenu.props.app.state.user;
+      if (this.user !== null) {
+        this.state.loggedIn = true;
+      }
+
+    }
+
+    this.state.owned = this.checkOwned();
+
   }
+
+  checkOwned() {
+    // check if user owns this entry
+    if (this.user === null) {
+      return false;
+    }
+    if (this.userLibrary === null) {
+      return false;
+    }
+
+    if (this.entry === null) {
+      return false;
+    }
+
+    let id = this.entry.content_id;
+    for (let entry of this.userLibrary) {
+      if (entry.content_id === id) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  clickBuy(e) {
+    e.stopPropagation();
+    if (this.state.owned) {
+      return;
+    }
+    // open buy dialog
+    const dialog = document.querySelector(".buyDialog" + this.entry.content_id);
+    dialog.showModal();
+  }
+
+  async clickBuyConfirm(e) {
+    e.stopPropagation();
+    // buy entry
+    const app = this.props.libMenu.props.app;
+    let req = await app.apiRequest("/buy", "POST", { 
+      item_id: this.entry.content_id,
+      session_id: app.state.user.session_id
+     });
+    let res = await req.json();
+    console.log(res);
+    if (res.status !== true) {
+      return;
+    }
+    const dialog = document.querySelector(".buyDialog" + this.entry.content_id);
+    dialog.close();
+    this.props.libMenu.props.store.setState({ balance: this.props.libMenu.props.store.state.balance - this.entry.price });
+    this.setState({ owned: true });
+  }
+
+  closeBuyDialog(e) {
+    e.stopPropagation();
+    // close buy dialog
+    const dialog = document.querySelector(".buyDialog" + this.entry.content_id);
+    dialog.close();
+  }
+
+
 
   render() {
     const duration = formatDuration(this.props.entry.duration);
     const rating = this.props.entry.rating;
     const price = getPriceString(this.props.entry.price);
 
+    let buttonClass = "rightPanelBuyButton";
+    if (this.state.owned) {
+      buttonClass += " owned";
+    }
+    const buttonText = this.state.owned ? "Owned" : "Buy for " + price;
     return (
       <div className="rightPanel">
+        <dialog className={"buyDialog" + " buyDialog" + this.entry.content_id} onClick={(e) => { e.stopPropagation(); }} open={this.state.buyDialogOpen}>
+          <div className="buyDialogInner">
+            {(this.state.loggedIn) ?
+              (<div>
+                <div className="buyDialogHeader">Buy {this.props.entry.title} for {price}?</div>
+                <div className="buyDialogButtons">
+                  <button className="buyDialogCancel rightPanelBuyButton" onClick={(e) => { this.closeBuyDialog(e); }}>Cancel</button>
+                  <button className="buyDialogBuy rightPanelBuyButton" onClick={(e) => { this.clickBuyConfirm(e); }}>Buy</button>
+                </div>
+              </div>) :
+              (<div>
+                <div className="buyDialogHeader">You must be logged in to buy {this.props.entry.title}.</div>
+                <button className="buyDialogCancel rightPanelBuyButton" onClick={(e) => { this.closeBuyDialog(e); }}>Cancel</button>
+              </div>)
+            }
+          </div>
+        </dialog>
+
         <div className="rightPanelTop">
           {/*
           - Rating
@@ -123,7 +229,7 @@ class StorePanel extends React.Component {
         </div>
         <div className="rightPanelBottom">
           <div className="rightPanelBuy">
-            <button className="rightPanelBuyButton">Buy for {price}</button>
+            <button onClick={(e) => this.clickBuy(e)} className={buttonClass}>{buttonText}</button>
           </div>
         </div>
       </div>
@@ -182,7 +288,7 @@ class LibraryPanel extends React.Component {
           </div>
           <div className="rightPanelStatus">{status}</div>
           <ProgressBar progress={progress * 100} />
-          
+
           <div className="rightPanelDuration">Remaining: {durationLeft}</div>
 
         </div>
@@ -306,7 +412,7 @@ class LibEntry extends React.Component {
           <div className="libEntryDescription libEntryDetails">{entry.description}</div>
         </div>
         <div className="libEntryRight">
-          {this.props.isStore ? <StorePanel entry={entry} /> : <LibraryPanel entry={entry} />}
+          {this.props.isStore ? <StorePanel entry={entry} libMenu={this.props.libMenu} /> : <LibraryPanel entry={entry} libMenu={this.props.libMenu} />}
           {/*
           <div className="libEntryStatus libEntryDetails">{status}</div>
           <div className="libEntryRating libEntryDetails">{this.getRating()}</div>
@@ -483,7 +589,7 @@ class LibSeriesEntry extends React.Component {
     let entryComponents = [];
     let key = 0;
     for (let entry of entries) {
-      entryComponents.push(<LibEntry isStore={this.props.isStore} entry={entry} key={key} callback={this.props.callback} libMenu={this.props.libMenu} isChild={true} />);
+      entryComponents.push(<LibEntry isStore={this.props.isStore} entry={entry} key={key} libMenu={this.props.libMenu} isChild={true} />);
       key++;
     }
 
@@ -492,7 +598,7 @@ class LibSeriesEntry extends React.Component {
     }
 
     if (entries.length === 1) {
-      return (<LibEntry isStore={this.props.isStore} entry={entries[0]} key={key} callback={this.props.callback} libMenu={this.props.libMenu} />);
+      return (<LibEntry isStore={this.props.isStore} entry={entries[0]} key={key} libMenu={this.props.libMenu} />);
     }
 
     return (
@@ -622,7 +728,7 @@ class LibList extends React.Component {
     let entries = [];
     let i = 0;
     for (let entry of lib) {
-      entries.push(<LibEntry isStore={this.props.isStore} entry={entry} key={i} callback={this.props.callback} libMenu={this.props.libMenu} />);
+      entries.push(<LibEntry isStore={this.props.isStore} entry={entry} key={i} libMenu={this.props.libMenu} />);
       i++;
     }
 
@@ -685,7 +791,7 @@ class LibList extends React.Component {
     let i = 0;
     for (let s of keys) {
       let e = series[s];
-      entries.push(<LibSeriesEntry isStore={this.props.isStore} series={s} entries={e} callback={this.props.callback} key={i} libMenu={this.props.libMenu} />);
+      entries.push(<LibSeriesEntry isStore={this.props.isStore} series={s} entries={e} key={i} libMenu={this.props.libMenu} />);
       i++;
     }
 

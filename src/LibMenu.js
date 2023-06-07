@@ -29,7 +29,8 @@ class LibMenu extends React.Component {
             maxCategories: 5,
             maxSubcategories: 5,
             search: '',
-            library: []
+            library: [],
+            userLibrary: []
         };
 
         this.myList = React.createRef();
@@ -53,22 +54,35 @@ class LibMenu extends React.Component {
     }
 
     async loadStore() {
-        const res = await this.props.app.apiRequest('/store', 'GET');
-        const json = await res.json();
-        this.setState({ library: json.items });
+        const resS = await this.props.app.apiRequest('/store', 'GET');
+        const jsonS = await resS.json();
+
+        // check if logged in
+        try {
+            if (this.props.app.state.user !== null) {
+
+                const resL = await this.props.app.apiRequest('/library', 'POST', { session_id: this.props.app.state.user.session_id });
+                const jsonL = await resL.json();
+                this.setState({ userLibrary: jsonL.items });
+            }
+        } catch (e) {
+            console.log(e);
+        }
+
+        this.setState({ library: jsonS.items });
     }
 
     async componentDidMount() {
 
         // load store if this is the store menu
         if (this.isStore()) {
-            await(this.loadStore());
+            await (this.loadStore());
             return;
         }
 
         // load library if logged in
         if (this.props.app.state.user !== null) {
-            await(this.loadLibrary());
+            await (this.loadLibrary());
         }
 
         // use long polling to update library
@@ -348,7 +362,7 @@ class LibMenu extends React.Component {
             let catName = cat.charAt(0).toUpperCase() + cat.slice(1) + " (" + categories[cat] + ")";
             categoryButtons.push(<button className={className} key={i} onClick={() => {
                 this.catClick(cat);
-                this.props.callback({ type: 'CLICK', name: "categoryButton", value: cat });
+                //this.props.callback({ type: 'CLICK', name: "categoryButton", value: cat });
             }}> {catName} </button>);
         }
 
@@ -358,10 +372,10 @@ class LibMenu extends React.Component {
             <div>
                 <div className="libMenu">
                     <div className="libMenuTitleBar">
-                        <h1 className="libMenuTitle">{this.isStore()? "Store" : "Library"}</h1>
+                        <h1 className="libMenuTitle">{this.isStore() ? "Store" : "Library"}</h1>
                         <input className="libMenuSearch" type="text" placeholder="Search" value={this.state.search} onChange={(event) => {
                             this.searchChange(event);
-                            this.props.callback({ type: "KEY", name: "searchFieldInput", value: event.target.value });
+                            //this.props.callback({ type: "KEY", name: "searchFieldInput", value: event.target.value });
                         }} />
 
                     </div>
@@ -373,7 +387,7 @@ class LibMenu extends React.Component {
                             <div className="libMenuSortDirection al-button" onClick={(e) => { this.myList.current.setSortAsc(e); }}>↓</div>
                             <select className="libMenuSorter al-button" onChange={(e) => {
                                 this.myList.current.setSortMode(e);
-                                this.props.callback({ type: "CLICK", name: "sortButton", value: e.target.value });
+                                //this.props.callback({ type: "CLICK", name: "sortButton", value: e.target.value });
                             }}>
                                 <option className='al-button'>{SortMode.NAME}</option>
                                 <option className='al-button'>{SortMode.DATE_RELEASED}</option>
@@ -389,8 +403,8 @@ class LibMenu extends React.Component {
 
 
                 </div>
-                
-                <LibList isStore={this.isStore()} callback={this.props.callback} library={library} libMenu={this} ref={this.myList} />
+
+                <LibList isStore={this.isStore()} library={library} libMenu={this} ref={this.myList} />
             </div>
         );
     }
