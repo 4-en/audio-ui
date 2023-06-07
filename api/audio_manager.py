@@ -292,6 +292,7 @@ class AbstractAudioManager:
         user_content = self._get_user_library(user_id)
         if user_content is None:
             return None
+        user_content.sort(key=lambda x: x.content_id)
         store_content = self.get_store_library()
         if store_content is None:
             return None
@@ -383,7 +384,17 @@ class AbstractAudioManager:
         """
         user = self._get_user_by_session_id(session_id)
         if user is None or user.check_session(session_id) is False:
-            return False
+            return None
+        
+        # check if user already owns item
+        user_library = self._get_user_library(user.user_id)
+        if user_library is not None and len(user_library) >0:
+            # check if user already owns item
+            for item in user_library:
+                if item.content_id == item_id:
+                    return False
+
+
         store_item = self.get_store_item_by_id(item_id)
         if store_item is None:
             return False

@@ -192,13 +192,14 @@ class AudioAPI:
 
         # buy item with session id and item id
         @self.app.post("/buy/")
-        async def buy(buy_request: BuyRequest) -> bool:
+        async def buy(buy_request: BuyRequest) -> StatusResponse:
             res = self.audioManager.buy_item(buy_request.session_id, buy_request.item_id)
             if res is None:
                 raise HTTPException(status_code=401, detail="Invalid session id")
             if res is False:
                 raise HTTPException(status_code=400, detail="Item not found")
-            return StatusResponse(status=True, message="Item bought")
+            r = StatusResponse(status=True, message="Item bought")
+            return r
         
         # "plays" item with session id and item id
         # since this is a demo, we just check if the user owns the item

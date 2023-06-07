@@ -19,7 +19,7 @@ class NoDBManager(AbstractAudioManager):
         self.create_test_users()
 
     def create_test_users(self):
-        user1 = User.create_new("Bob", "1234", "bob@example.com")
+        user1 = User.create_new("Bob", "1234", "bob@example.com", balance=100000)
         user2 = User.create_new("Alice", "1234", "alice@example.com")
         user3 = User.create_new("User", "1234", "user@example.com")
         admin = User.create_new("Admin", "1234", "admin@example.com", admin=True)
@@ -40,8 +40,6 @@ class NoDBManager(AbstractAudioManager):
                 s.add(random.randint(0, len(self.store)-1))
             for item_id in s:
                 self.buy_item(session_id, item_id)
-
-
 
 
     def load_json_library(self, path: str = "library.json"):
