@@ -107,3 +107,24 @@ body {
     /* remove element */
     display: none;
   }
+
+  .noapi {
+    border: 5px solid red;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px;
+    text-align: center;
+
+  }
+
+  .noapi h1 {
+    margin: 0;
+    padding: 0;
+    font-size: xx-large;
+  }
+
+  .noapi p {
+    margin: 0;
+    padding: 0;
+    font-size: large;
+  }

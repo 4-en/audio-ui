@@ -13,7 +13,8 @@ const SortMode = {
   DATE_RELEASED: "Release date",
   DATE_ADDED: "Recent",
   RATING: "Rating",
-  STATUS: "Status"
+  STATUS: "Status",
+  PRICE: "Price"
 }
 
 function formatDuration(duration) {
@@ -161,10 +162,10 @@ class StorePanel extends React.Component {
     e.stopPropagation();
     // buy entry
     const app = this.props.libMenu.props.app;
-    let req = await app.apiRequest("/buy", "POST", { 
+    let req = await app.apiRequest("/buy", "POST", {
       item_id: this.entry.content_id,
       session_id: app.state.user.session_id
-     });
+    });
     let res = await req.json();
     console.log(res);
     if (res.status !== true) {
@@ -261,6 +262,11 @@ class LibraryPanel extends React.Component {
     super(props);
   }
 
+  play(e) {
+    e.stopPropagation();
+    this.props.libMenu.play(this.props.entry);
+  }
+
   render() {
     const rating = this.props.entry.rating;
     const progress = this.props.entry.progress;
@@ -271,6 +277,7 @@ class LibraryPanel extends React.Component {
         status = ListenStatus.COMPLETED;
       }
     }
+
 
     const durationLeft = formatDuration(this.props.entry.duration * (1 - progress));
 
@@ -294,7 +301,9 @@ class LibraryPanel extends React.Component {
         </div>
         <div className="rightPanelBottom">
           <div className="rightPanelPlay">
-            <button className="rightPanelPlayButton">Play</button>
+            <button className="rightPanelPlayButton" onClick={(e) => { this.play(e); }}><svg className="libPlayerMainButtonImg" viewBox="0 0 99 128">
+              <polygon fill="currentColor" points="0 0 99 64 0 128 0 0" />
+            </svg></button>
           </div>
         </div>
       </div>
@@ -720,6 +729,7 @@ class LibList extends React.Component {
       [SortMode.STATUS]: (a, b) => { return (a.progress - b.progress) * c; },
       [SortMode.RATING]: (a, b) => { return (a.rating - b.rating) * c; },
       [SortMode.DATE_RELEASED]: (a, b) => { return (a.releaseDate - b.releaseDate) * c; },
+      [SortMode.PRICE]: (a, b) => { return (a.price - b.price) * c; },
     };
 
     lib.sort(entrySortModes[sortMode]);
@@ -782,6 +792,7 @@ class LibList extends React.Component {
       [SortMode.STATUS]: (a, b) => { return (series[a][0].progress - series[b][0].progress) * c; },
       [SortMode.RATING]: (a, b) => { return (series[a][0].rating - series[b][0].rating) * c; },
       [SortMode.DATE_RELEASED]: (a, b) => { return (series[a][0].releaseDate - series[b][0].releaseDate) * c; },
+      [SortMode.PRICE]: (a, b) => { return (series[a].map((e) => { return e.price; }).reduce((a, b) => { return a + b; }) - series[b].map((e) => { return e.price; }).reduce((a, b) => { return a + b; })) * c; },
     };
 
     keys.sort(seriesSortModes[sortMode]);

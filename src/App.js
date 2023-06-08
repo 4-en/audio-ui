@@ -10,6 +10,7 @@ import Home from './Home';
 import Login from './Login';
 import Store from './Store';
 import AdminStore from './AdminStore';
+import NoApi from './NoApi';
 
 
 /*
@@ -43,10 +44,61 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      user: null
+      user: null,
+      apiAvailable: true,
     };
 
     this.myMenu = React.createRef();
+
+  }
+
+  async fetchTimeout(url, options, timeout = 1000) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('Request timed out'));
+      }, timeout);
+      
+      fetch(url, options)
+        .then(response => {
+          clearTimeout(timer);
+          resolve(response);
+        })
+        .catch(err => {
+          clearTimeout(timer);
+          reject(err);
+        })
+    })
+  }
+
+  async componentDidMount() {
+    // check if API is available
+    let tries = 0;
+    const maxTries = 3;
+    while (tries < maxTries) {
+      try {
+        let response = await this.fetchTimeout(this.getAPIAddress() + "/", { 
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
+          }
+         }, 1000);
+        if (response.status === 200) {
+          break;
+        }
+      } catch (error) {
+      }
+
+      tries++;
+      await this.sleep(100);
+    }
+    if (tries === maxTries) {
+      // api is not available
+      this.setState({ apiAvailable: false });
+      return;
+    }
 
   }
 
@@ -95,6 +147,12 @@ class App extends React.Component {
   render() {
 
     let home = <Home library={this} />;
+
+    if (!this.state.apiAvailable) {
+      return (
+        <NoApi apiAddress={this.getAPIAddress()} />
+      );
+    }
 
 
     return (

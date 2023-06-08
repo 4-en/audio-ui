@@ -164,6 +164,7 @@
 }
 
 .libEntryRight {
+    margin: 0;
     /* align elements on right side */
     text-align: right;
     align-items: right;
@@ -356,6 +357,7 @@
     height: 100%;
     /* transition: 0.2s; */
     transition: height 0.2s;
+    font-size: 16px;
 }
 
 .rightPanelTop {
@@ -381,7 +383,7 @@
 }
 
 .progressOuter {
-    width: 100px;
+    width: 200px;
     height: 4px;
     background-color: var(--bg-color-darker);
     border-radius: 2px;
@@ -399,24 +401,30 @@
     transition: 0.2s;
 }
 
+
 .rightPanelPlayButton {
     background-color: var(--text-color);
     color: var(--bg-color);
-    border-radius: 10px;
-    margin: 10px;
+    margin: 0px;
+    transition: 0.2s;
+    width: 40px;
+    height: 40px;
+    margin: 0 0px;
     cursor: pointer;
     transition: 0.2s;
-    text-align: center;
-    margin: 10px;
-    font-size: x-large;
-    height: 40px;
-    padding: 0 20px;
+    padding: 12px;
+    border-radius: 50%;
     border: 1.5px solid var(--text-color);
 }
 
 
 .rightPanelPlayButton:hover {
     background-color: transparent;
+    color: var(--text-color);
+    
+}
+
+.rightPanelPlayButton:hover .libPlayerMainButtonImg {
     color: var(--text-color);
 }
 
@@ -442,9 +450,129 @@
     border-radius: 10px;
     border: 1px solid var(--text-color);
     color: var(--text-color);
+    font-size: 22px;
+}
+
+.buyDialogButtons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .buyDialog::backdrop {
     background: rgba(0, 0, 0, 0.5);
 }
 
+.libPlayerContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 120px;
+    background-color: var(--bg-color-darker);
+    border-top: 1px solid var(--text-color-darker);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.libPlayer {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    justify-items: center;
+
+}
+
+.libPlayerControls {
+    justify-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.libPlayerMainButton {
+    width: 40px;
+    height: 40px;
+    margin: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    background-color: var(--text-color);
+    padding: 12px;
+    border-radius: 50%;
+}
+
+.libPlayerMainButton:hover {
+    background-color: transparent;
+    color: var(--text-color);
+}
+
+.libPlayerMainButtonImg {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    transition: 0.2s;
+    /* change color of svg to background color */
+    color: var(--bg-color);
+    
+}
+
+.libPlayerMainButton:hover .libPlayerMainButtonImg {
+    color: var(--text-color);
+}
+
+.libPlayerTimeline {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-size: medium;
+}
+
+
+.libPlayerProgressOuter {
+    width: 500px;
+    height: 4px;
+    background-color: var(--bg-color-lighter);
+    border-radius: 2px;
+    margin-top: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+
+    cursor: pointer;
+}
+
+.libPlayerProgressInner {
+    height: 100%;
+    background-color: var(--text-color);
+    border-radius: 2px;
+    text-align: center;
+    line-height: 20px;
+    color: var(--bg-color);
+    font-size: 20px;
+    transition: 0.2s;
+}
+
+.libPlayerInfo {
+    justify-self: start;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.libPlayerCover {
+    width: 100px;
+    height: 100px;
+    border-radius: 5px;
+    margin: 10px;
+}

@@ -16,7 +16,119 @@ const SortMode = {
     DATE_RELEASED: "Release date",
     DATE_ADDED: "Recent",
     RATING: "Rating",
-    STATUS: "Status"
+    STATUS: "Status",
+    PRICE: "Price"
+}
+
+
+
+class LibPlayer extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            hidden: true,
+            entry: null,
+            playing: false,
+            time: 0,
+            duration: 0,
+            volume: 0.5,
+            muted: false
+        };
+    }
+
+    setEntry(entry) {
+        this.setState({ entry: entry });
+        this.play();
+    }
+
+    play() {
+        this.setState({ playing: true, hidden: false });
+    }
+
+    pause() {
+        this.setState({ playing: false });
+    }
+
+    playClick() {
+        if (this.state.playing) {
+            this.pause();
+        } else {
+
+            this.play();
+        }
+    }
+
+    setProgress(progress) {
+        console.log(progress);
+    }
+
+    progressClick(e) {
+        // get progress bar
+        let progressBar = document.getElementsByClassName('libPlayerProgressOuter')[0];
+        // get progress bar width
+        let progressBarWidth = progressBar.offsetWidth;
+        // get click position
+        let clickX = e.clientX;
+        // get click position relative to progress bar
+        let clickXRelative = clickX - progressBar.getBoundingClientRect().left;
+        // get progress percentage
+        let progress = clickXRelative / progressBarWidth;
+        // set progress
+        this.setProgress(progress);
+    }
+
+
+
+    render() {
+
+        if (this.state.hidden || this.state.entry === null) {
+            return null;
+        }
+
+        const buttonSrc = this.state.playing ? (
+            <svg className="libPlayerMainButtonImg" viewBox="0 0 128 128">
+                <rect fill="currentColor" width="42.67" height="128" />
+                <rect fill="currentColor" x="85.33" width="42.67" height="128" />
+            </svg>) : (
+            <svg className="libPlayerMainButtonImg" viewBox="0 0 99 128">
+                <polygon fill="currentColor" points="0 0 99 64 0 128 0 0" />
+            </svg>
+        )
+
+        const currentTime = "00:00";
+        const maxTime = "99:99";
+        const progress = "20";
+
+        console.log(this.state.entry);
+
+        return (
+            <div className="libPlayerContainer">
+                <div className="libPlayer">
+                    {/*<audio id="audio" src={this.state.entry !== null ? this.state.entry.audio_url : null} autoPlay={this.state.playing} />*/}
+
+                    <div className="libPlayerInfo">
+                        <img className="libPlayerCover" src={"/static/covers/" + this.state.entry.cover_file} alt="cover" />
+                        <div className="libPlayerTextInfo">
+                            <div className="libPlayerTitle">{this.state.entry.title}</div>
+                            <div className="libPlayerAuthor">{this.state.entry.author.first_name + ' ' + this.state.entry.author.last_name}</div>
+                        </div>
+                    </div>
+                    <div className="libPlayerControls">
+                        <button className="libPlayerMainButton" onClick={() => { this.playClick(); }}>{buttonSrc}</button>
+                        <div className="libPlayerTimeline">
+                            <div className="libPlayerCurrent-time">{currentTime}</div>
+                            <div className="libPlayerProgressOuter" onClick={(e) => { this.progressClick(e); }}>
+                                <div className="libPlayerProgressInner" style={{ width: progress + '%' }}></div>
+                            </div>
+                            <div className="libPlayerMax-time">{maxTime}</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
 }
 
 class LibMenu extends React.Component {
@@ -34,8 +146,13 @@ class LibMenu extends React.Component {
         };
 
         this.myList = React.createRef();
+        this.player = React.createRef();
 
         window.resetApp = this.reset.bind(this);
+    }
+
+    play(entry) {
+        this.player.current.setEntry(entry);
     }
 
     isStore() {
@@ -393,7 +510,7 @@ class LibMenu extends React.Component {
                                 <option className='al-button'>{SortMode.DATE_RELEASED}</option>
                                 <option className='al-button'>{SortMode.DATE_ADDED}</option>
                                 <option className='al-button'>{SortMode.RATING}</option>
-                                <option className='al-button'>{SortMode.STATUS}</option>
+                                {this.isStore() ? <option className='al-button'>{SortMode.PRICE}</option> : <option className='al-button'>{SortMode.STATUS}</option>}
                             </select>
                         </div>
                     </div>
@@ -405,6 +522,7 @@ class LibMenu extends React.Component {
                 </div>
 
                 <LibList isStore={this.isStore()} library={library} libMenu={this} ref={this.myList} />
+                {this.isStore() ? null : <LibPlayer ref={this.player} />}
             </div>
         );
     }
