@@ -1,0 +1,88 @@
+
+.loginsub-main{
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    justify-content: center;
+    height: 550px;
+    width: 35%;
+    box-shadow: 0px 0px 10px 3cap rgb(207, 207, 207);
+    padding-top: 30px;
+    border-radius: 60px;
+    background-color: white;
+    color: black;
+    text-align: center;
+    font-size: 26px;
+    position: relative;
+}
+.ltext{
+    padding-top: 48px;
+    padding-bottom: 48px;
+}
+.container-image{
+    background-color: rgb(223, 221, 221);
+    border-radius: 150px;
+    align-items: center;
+    display: flex;
+    height: 115px;
+    width: 115px;
+}
+.profile{
+    height: 100px;
+    width: 100px;
+    border-radius: 130px;
+}
+input{
+    width: 300px;
+    height: 50px;
+    border-radius: 60px;
+    box-shadow: inset 0px 0px 25px 0px #888;
+    border: none;
+    outline: none;
+    background-color: #fff;
+    color: black;
+}
+.email{
+    height: 25px;
+    width: 25px;
+    position: absolute;
+    padding: 14px 0 0 25px;
+    color: black;
+}
+.name{
+    padding-left: 16px;
+    font-size: 20px;
+    
+
+}
+.second-input{
+    padding-top: 20px;
+}
+.third-input{
+    padding-top: 20px;
+}
+.lbutton{
+    width: 300px;
+    height: 50px;
+    border-radius: 60px;
+    background-color: #867f8a;
+    color: rgb(0, 0, 0);
+    font-size: 25px;
+    border: none;
+    text-align: center;
+ 
+}
+.lb{
+    color: black;
+    text-align: center;
+    padding-top: 10px;
+    font-weight: 600;
+}
+.paddingbutton{
+    padding-top: 20px;
+}
+.reg{
+    padding-top: 12px;
+    font-size: 24px;
+    text-align: center;
+}

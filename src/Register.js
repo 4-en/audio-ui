@@ -4,7 +4,7 @@ import email from "./images/email.jpg";
 import password from "./images/password.png";
 
 
-class Login extends React.Component {
+class Register extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -22,27 +22,34 @@ class Login extends React.Component {
 
                             <div>
                                 <div className='ltext'>
-                                    <h1>Login Page</h1>
+                                    <h1>Register</h1>
                                 </div>
 
                                 <div>
                                 
                                     <input type="text" placerholder="user name" className="name" />
-                                </div>
-                                <div className='second-input'>
-                               
-                                    <input type="password" placerholder="user name" className="name" />
-                                </div>
+                                    <div className='second-input'>
+                                        </div>
+                                        <div>
+                                        
+                                            <input type="email" placerholder="email" className="name" />
+                                        </div>
+                                        </div>
+                                        <div className='third-input'>
+                                    
+                                            <input type="password" placerholder="user name" className="name" />
+                                        </div>
+                                    
                                 <div className='paddingbutton'>
                                     <div className='lbutton'>
                                         <button className='lb'>
-                                            Login
+                                            Register
                                         </button>
                                     </div>
                                 </div>
 
                                 <p className='reg'>
-                                    <a href='register'>Sign up</a>
+                                    <a href='store'>Login</a>
                                 </p>
 
 
@@ -54,4 +61,4 @@ class Login extends React.Component {
     }
 }
 
-export default Login;
+export default Register;

@@ -2,6 +2,7 @@ import './reset.css';
 import './style.css';
 import './navbar.css';
 import './library.css';
+import './Login.css';
 import LibMenu from './LibMenu';
 import React from 'react';
 import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
@@ -11,6 +12,9 @@ import Login from './Login';
 import Store from './Store';
 import AdminStore from './AdminStore';
 import NoApi from './NoApi';
+import Register from './Register';
+//import {Login} from "./Login";
+//import {Login} from "./Register";
 
 
 /*
@@ -164,6 +168,7 @@ class App extends React.Component {
             <Route path="/" element={home} />
             <Route path="/library" element={<LibMenu app={this} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
             <Route path="/login" element={<Login app={this} />} />
+            <Route path="/register" element={<Register app={this} />} />
             <Route path="/store" element={<Store app={this} />} />
             <Route path="/admin" element={<AdminStore app={this} />} />
           </Routes>
