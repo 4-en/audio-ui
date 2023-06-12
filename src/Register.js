@@ -60,9 +60,14 @@ class Register extends React.Component {
                                         </button>
                                     </div>
                                 </div>
+                                <div className='or'>
+                                <h2>or</h2>
+                                </div>
                                 </form>
-                                <p className='reg'>
-                                    <a href='login'>Login</a>
+                                <p className='lbutton'>
+                                    <div className='textpadding'>
+                                    <Link className='lb' to="/login">Login</Link>
+                                    </div>
                                 </p>
 
 

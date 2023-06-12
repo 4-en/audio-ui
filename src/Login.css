@@ -16,8 +16,10 @@
     position: relative;
 }
 .ltext{
-    padding-top: 48px;
-    padding-bottom: 48px;
+    padding-top: 36px;
+    padding-bottom: 36px;
+    font-size: 36px;
+   
 }
 .container-image{
     background-color: rgb(223, 221, 221);
@@ -70,6 +72,8 @@ input{
     font-size: 25px;
     border: none;
     text-align: center;
+    text-decoration: none;
+    
  
 }
 .lb{
@@ -77,12 +81,21 @@ input{
     text-align: center;
     padding-top: 10px;
     font-weight: 600;
+    text-decoration: none;
 }
 .paddingbutton{
     padding-top: 20px;
+    
 }
 .reg{
     padding-top: 12px;
     font-size: 24px;
     text-align: center;
+}
+.textpadding{
+    padding-top: 8px;
+}
+.or{
+    padding-top: 4px;
+    padding-bottom: 4px;
 }

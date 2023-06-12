@@ -36,7 +36,7 @@ class Login extends React.Component {
 
                             <div>
                                 <div className='ltext'>
-                                    <h1>Login Page</h1>
+                                    <h1>Login</h1>
                                 </div>                          
                                 <form onSubmit={handleSubmit}>
                                 <div>
@@ -57,8 +57,13 @@ class Login extends React.Component {
                                     
                                 </div>
                                 </form>
-                                <p className='reg'>
-                                    <a href='register'>Sign up</a>
+                                <div className='or'>
+                                <h2>or</h2>
+                                </div>
+                                <p className='lbutton'>
+                                    <div className='textpadding'>
+                                    <Link className='lb' to="/register">Register</Link>
+                                    </div>
                                 </p>
 
 
