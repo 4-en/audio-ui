@@ -9,6 +9,7 @@ from audiotypes import AudioContent
 import asyncio
 
 
+
 origins = [
     "http://localhost:3000",
     "http://localhost:8000",
@@ -137,6 +138,12 @@ class AudioAPI:
         # Routes
         @self.app.get("/")
         async def root():
+            return StatusResponse(status=True, message="Audio API is running")
+        
+        # test route
+        @self.app.get("/test/")
+        async def test():
+            mydb.ping(reconnect=True, attempts=3, delay=5)
             return StatusResponse(status=True, message="Audio API is running")
 
         # login with username and password
