@@ -77,6 +77,9 @@ class App extends React.Component {
 
   async componentDidMount() {
     // check if API is available
+
+    return;
+
     let tries = 0;
     const maxTries = 3;
     while (tries < maxTries) {
