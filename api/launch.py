@@ -1,8 +1,9 @@
 from api import AudioAPI
 from NoDBManager import NoDBManager
+from MySQLManager import MySQLManager
 
 def main():
-    audioManager = NoDBManager()
+    audioManager = MySQLManager()
     api = AudioAPI(audioManager)
     api.run()
 

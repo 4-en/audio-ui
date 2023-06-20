@@ -66,37 +66,74 @@ class MySQLManager(AbstractAudioManager):
         """
         Create user
         """
-        raise NotImplementedError
+        #self.cursor.execute("INSERT INTO User (name, password) VALUES (%s, %s)", 
+        #                    (user.username, user.passhash))
+        self.cursor.execute("INSERT INTO User (name, password, salt, email, balance, admin, join_date) VALUES (%s, %s, %s, %s, %s, %s, %s)", 
+                            (user.username, user.passhash, user.salt, user.email, user.balance, user.admin, user.created))
+        self.db.commit()
+
+        return self._get_user_by_name(user.username)
     
     def _edit_user(self, user:User) -> bool:
         """
         Edit user
         """
-        raise NotImplementedError
+        self.cursor.execute("UPDATE User SET name = %s, password = %s, salt = %s, email = %s, balance = %s, admin = %s, join_date = %s WHERE id = %s", 
+                            (user.username, user.passhash, user.salt, user.email, user.balance, user.admin, user.created, user.id))
+        # check result
+        if self.cursor.rowcount == 0:
+            return False
+        self.db.commit()
+        return True
     
     def _delete_user(self, user_id: int) -> bool:
         """
         Delete user
         """
-        raise NotImplementedError
+        self.cursor.execute("DELETE FROM User WHERE id = %s", (user_id,))
+        # check result
+        if self.cursor.rowcount == 0:
+            return False
+        self.db.commit()
+        return True
+    
+    def _result_to_user(self, result) -> User:
+        """
+        Convert result to user
+        """
+        user = User(result[0], result[1], result[2], result[3], result[8], result[4], result[5], result[6], result[7], result[9])
+        return user
     
     def _get_user_by_name(self, username: str) -> User:
         """
         Get user by username
         """
-        raise NotImplementedError
+        self.cursor.execute("SELECT * FROM User WHERE name = %s", (username,))
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        return self._result_to_user(result)
+        
     
     def _get_user_by_id(self, user_id: int) -> User:
         """
         Get user by user id
         """
-        raise NotImplementedError
+        self.cursor.execute("SELECT * FROM User WHERE id = %s", (user_id,))
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        return self._result_to_user(result)
     
     def _get_user_by_session_id(self, session_id: str) -> User:
         """
         Get user by session id
         """
-        raise NotImplementedError
+        self.cursor.execute("SELECT * FROM User WHERE session_id = %s", (session_id,))
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        return self._result_to_user(result)
     
     def _create_user_item(self, user_content:UserContent) -> UserContent:
         """
