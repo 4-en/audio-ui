@@ -17,6 +17,11 @@ body {
 
     --text-color-contrast: rgb(236, 151, 24);
 
+    /*Login+Register Colors*/
+    --bg-color-login: #4d4d63;
+    --box-shadow-login: #9090a5;
+    --text-color-login: #f0f0ff;
+    --button-color-login:  #363650;
 
 }
 body.light-theme {
@@ -28,6 +33,12 @@ body.light-theme {
     --text-color-lighter: #26262a;
 
     --text-color-transparent: rgba(40, 40, 60, 0.5);
+
+    /*Login+Register Colors*/
+    --bg-color-login: #d8d8da;
+    --box-shadow-login: #b1b1b6;
+    --text-color-login: #151516;
+    --button-color-login:  #808081;
 }
 
 body {
