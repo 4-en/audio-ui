@@ -10,26 +10,18 @@ class Home extends React.Component {
     }
 
     render() {
-        return ( <
-            body >
-            <
-            > < div >
-            <
-            header >
-            <
-            a href = "/" >
+        return (<div>
+            <header>
+            <a href = "/" >
 
             <
-            /a> <
-            /header> <
+            /a> </header> <
             div id = 'bild' >
             <
             img src = "./static/AudioBild.jpg"
             alt = "..." /
             >
-            <
-            p style = {
-                { margin: '20px 0' } } > < /p>
+            <p style = {{ margin: '20px 0' } } > </p>
 
 
             <
@@ -87,10 +79,7 @@ class Home extends React.Component {
             Mit unseren Audio - und Hörbuch - Services haben Sie immer Zugriff auf die besten Hörbücher und kannst sie überall und jederzeit hören.Besuche unsere Website, um mehr über unsere Services zu erfahren und ein unvergessliches Hörerlebnis zu genießen!
             <
             /p> <
-            /section> <
-            /div> <
-            p style = {
-                { margin: '40px 0' } } > < /p>
+            /section><p style = {{ margin: '40px 0' } } > </p>
 
             <
             section id = "kontakt" >
@@ -112,7 +101,7 @@ class Home extends React.Component {
 
             <
             Link to = "/library" > Besuchen Sie die Liberary ohne Anmeldung < /Link> <
-            /div></ >
+            /div>
             <
             p style = {
                 { margin: '35px 0' } } > < /p>
@@ -132,8 +121,8 @@ class Home extends React.Component {
 
             <
             /nav> <
-            /div>      <
-            /body>
+            /div> 
+            </div>
         );
     }
 }

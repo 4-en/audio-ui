@@ -3,13 +3,6 @@ import { Form, Link } from 'react-router-dom';
 //import email from "./images/email.jpg";
 //import password from "./images/password.png";
 
-function handleSubmit(e) {
-    //TODO: real login
-    e.preventDefault();
-    var first=e.target.uname.value;
-    var second=e.target.pword.value;
-    console.log("Username: "+first,"\n","Password: "+second)
-} 
 
 class Login extends React.Component {
     
@@ -18,6 +11,21 @@ class Login extends React.Component {
         
     }
     
+    async handleSubmit(e) {
+        //TODO: real login
+        e.preventDefault();
+        var first=e.target.uname.value;
+        var second=e.target.pword.value;
+        //console.log("Username: "+first,"\n","Password: "+second)
+    
+        let res = await this.props.app.login(first, second);
+        if (res) {
+            // successful login
+        } else {
+            // unsuccessful login
+        }
+    
+    } 
         
     
    
@@ -38,14 +46,14 @@ class Login extends React.Component {
                                 <div className='ltext'>
                                     <h1>Login</h1>
                                 </div>                          
-                                <form onSubmit={handleSubmit}>
+                                <form onSubmit={(e)=>{this.handleSubmit(e);}}>
                                 <div>
                                     
-                                    <input  type="text" name='uname' placeholder="username" className="name" />
+                                    <input className="linput name"  type="text" name='uname' placeholder="Username" />
                                 </div>
                                 <div className='second-input'>
                                
-                                    <input type="password" name='pword' placeholder="password" className="name" />
+                                    <input className="linput name" type="password" name='pword' placeholder="Password" />
                                 </div>
                                 <div className='paddingbutton'>
                                     <div className='lbutton'>

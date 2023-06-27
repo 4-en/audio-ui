@@ -3,24 +3,28 @@ import { Form, Link } from 'react-router-dom';
 import email from "./images/email.jpg";
 import password from "./images/password.png";
 
-function handleSubmit(e) {
-    //TODO: real registration
-    e.preventDefault();
-    var first=e.target.uname.value;
-    var second=e.target.pword.value;
-    var third=e.target.mail.value;
-    console.log("Username: "+first,"\n","Password: "+second,"\n","Email: "+third)
-} 
+
 
 class Register extends React.Component {
     constructor(props) {
         super(props);
     }
 
-    submitregister(){
+    async handleSubmit(e) {
+        //TODO: real registration
+        e.preventDefault();
+        var first=e.target.uname.value;
+        var second=e.target.pword.value;
+        var third=e.target.mail.value;
         
-        console.log(this.email);
-    }
+        let res = await this.props.app.register(first, second, third);
+        if (res) {
+            // successful login
+        } else {
+            // unsuccessful login
+        }
+    } 
+
 
  // <img src={password} alt="password" className="email" />
 // <img src={password} alt="password" className="email" />
@@ -37,25 +41,25 @@ class Register extends React.Component {
                                 <div className='ltext'>
                                     <h1>Register</h1>
                                 </div>
-                                <form onSubmit={handleSubmit}>
+                                <form onSubmit={(e)=>{this.handleSubmit(e);}}>
                                 <div>
                                 
-                                    <input type="text" name='uname' placeholder="username" className="name" />
+                                    <input type="text" name='uname' placeholder="username" className="linput name"  />
                                     <div className='second-input'>
                                         </div>
                                         <div>
                                         
-                                            <input type="email" name='mail' placeholder="email"  className="name" />
+                                            <input type="email" name='mail' placeholder="email"  className="linput name"  />
                                         </div>
                                         </div>
                                         <div className='third-input'>
                                     
-                                            <input type="password" name='pword' placeholder="password" className="name" />
+                                            <input type="password" name='pword' placeholder="password" className="linput name"  />
                                         </div>
                                     
                                 <div className='paddingbutton'>
                                     <div className='lbutton'>
-                                        <button onClick={this.submitregister}  className='lb'>
+                                        <button  className='lb'>
                                             Register
                                         </button>
                                     </div>

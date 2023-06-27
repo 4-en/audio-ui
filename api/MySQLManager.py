@@ -33,9 +33,47 @@ class MySQLManager(AbstractAudioManager):
             exit(1)
 
         # print every entry from User table
-        self.cursor.execute("SELECT * FROM User")
-        for x in self.cursor:
-            print(x)
+        #self.cursor.execute("SELECT * FROM User")
+        #for x in self.cursor:
+        #    print(x)
+
+        #init library from json
+        #self.load_json_library()
+
+    def load_json_library(self, path: str = "library.json"):
+        l = []
+        with open(path, "r") as f:
+            l = json.load(f)
+
+        getType = lambda x: AudioType.Audiobook if x == "audiobook" else AudioType.Podcast if x == "podcast" else 2
+        
+        for item in l:
+            author_name = item["author"].split(" ")
+            author = Author(-1, " ".join(author_name[:-1]), author_name[-1], "no bio")
+            author2 = self.get_author_by_name(author.first_name, author.last_name)
+            if author2 is None:
+                print("Creating new author: ", author.first_name, author.last_name)
+                author = self._create_author(author)
+            else:
+                author = author2
+            
+            audioContent = AudioContent(
+                -1,
+                getType(item["type"]),
+                item["title"],
+                author.author_id,
+                item["category"],
+                item["series"],
+                sum([c["duration"] for c in item["chapters"]]),
+                item["rating"],
+                int(item["price"]*100),
+                item["cover"],
+                item["releaseDate"],
+                item["addedDate"],
+                item["seriesIndex"]
+            )
+            print("Creating new audioContent: ", audioContent.title)
+            audioContent = self._create_store_item(audioContent)
 
 
     def _loadAuthentications(self):
@@ -78,7 +116,7 @@ class MySQLManager(AbstractAudioManager):
         """
         Edit user
         """
-        self.cursor.execute("UPDATE User SET name = %s, password = %s, salt = %s, email = %s, balance = %s, admin = %s, join_date = %s WHERE id = %s", 
+        self.cursor.execute("UPDATE User SET name = %s, password = %s, salt = %s, email = %s, balance = %s, admin = %s, join_date = %s WHERE user_id = %s", 
                             (user.username, user.passhash, user.salt, user.email, user.balance, user.admin, user.created, user.id))
         # check result
         if self.cursor.rowcount == 0:
@@ -90,7 +128,7 @@ class MySQLManager(AbstractAudioManager):
         """
         Delete user
         """
-        self.cursor.execute("DELETE FROM User WHERE id = %s", (user_id,))
+        self.cursor.execute("DELETE FROM User WHERE user_id = %s", (user_id,))
         # check result
         if self.cursor.rowcount == 0:
             return False
@@ -119,7 +157,7 @@ class MySQLManager(AbstractAudioManager):
         """
         Get user by user id
         """
-        self.cursor.execute("SELECT * FROM User WHERE id = %s", (user_id,))
+        self.cursor.execute("SELECT * FROM User WHERE user_id = %s", (user_id,))
         result = self.cursor.fetchone()
         if result is None:
             return None
@@ -145,7 +183,7 @@ class MySQLManager(AbstractAudioManager):
         """
         Get user library by user id
         """
-        raise NotImplementedError
+        return []
 
     def _edit_user_item(self, user_content:UserContent) -> bool:
         """
@@ -159,68 +197,172 @@ class MySQLManager(AbstractAudioManager):
         """
         raise NotImplementedError
     
+    def _result_to_store_item(self, result) -> AudioContent:
+        """
+        Convert result to store item
+        """
+        audioContent = AudioContent(result[0], result[1], result[2], result[5], result[6].split(";"), result[3], result[8], result[10], result[9], result[7], result[11], result[12], result[4])
+        return audioContent
+    
     def _get_store_library(self) -> list:
         """
         Get store library
         """
-        raise NotImplementedError
+        store_library = []
+        self.cursor.execute("SELECT * FROM AudioContent")
+        for result in self.cursor:
+            store_library.append(self._result_to_store_item(result))
+        return store_library
     
     def _get_store_item_by_id(self, item_id: int) -> AudioContent:
         """
         Get store item by item id
         """
-        raise NotImplementedError
+        self.cursor.execute("SELECT * FROM AudioContent WHERE audio_id = %s", (item_id,))
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        return self._result_to_store_item(result)
     
     def _create_store_item(self, audioContent:AudioContent) -> AudioContent:
         """
         Create store item
         """
-        raise NotImplementedError
+        self.cursor.execute("INSERT INTO AudioContent (audio_type, title, series, series_index, author_id, categories, cover_name, duration, price, rating, releaseDate, addedDate) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            (audioContent.audio_type, 
+                             audioContent.title, 
+                             audioContent.series, 
+                             audioContent.series_index, 
+                             audioContent.author_id, 
+                             ";".join(audioContent.categories), 
+                             audioContent.cover_file, 
+                             audioContent.duration, 
+                             audioContent.price, 
+                             audioContent.rating, 
+                             audioContent.releaseDate, 
+                             audioContent.addedDate))
+        
+        self.db.commit()
+        return self._get_store_item_by_id(self.cursor.lastrowid)
     
     def _edit_store_item(self, audioContent:AudioContent) -> AudioContent:
         """
         Edit store item
         """
-        raise NotImplementedError
+        self.cursor.execute("UPDATE AudioContent SET audio_type = %s, title = %s, series = %s, series_index = %s, author_id = %s, categories = %s, cover_name = %s, duration = %s, price = %s, rating = %s, releaseDate = %s, addedDate = %s WHERE audio_id = %s",
+                            (audioContent.audio_type, 
+                             audioContent.title, 
+                             audioContent.series, 
+                             audioContent.series_index, 
+                             audioContent.author_id, 
+                             ";".join(audioContent.categories), 
+                             audioContent.cover_file, 
+                             audioContent.duration, 
+                             audioContent.price, 
+                             audioContent.rating, 
+                             audioContent.releaseDate, 
+                             audioContent.addedDate, 
+                             audioContent.id))
+        self.db.commit()
+        return self._get_store_item_by_id(audioContent.id)
+        
     
     def _delete_store_item(self, item_id: int) -> bool:
         """
         Delete store item
         """
-        raise NotImplementedError
+        self.cursor.execute("DELETE FROM AudioContent WHERE audio_id = %s", (item_id,))
+        if self.cursor.rowcount == 0:
+            return False
+        self.db.commit()
+        return True
     
     def _create_author(self, author:Author) -> Author:
         """
         Create author
         """
-        raise NotImplementedError
+        self.cursor.execute("INSERT INTO Authors (first_name, last_name, bio) VALUES (%s, %s, %s)",
+                            (author.first_name, author.last_name, author.bio))
+        
+        if self.cursor.rowcount == 0:
+            return None
+        self.db.commit()
+        return self.get_author_by_id(self.cursor.lastrowid)
     
     def _edit_author(self, author:Author) -> bool:
         """
         Edit author
         """
-        raise NotImplementedError
+        self.cursor.execute("UPDATE Authors SET first_name = %s, last_name = %s, bio = %s WHERE author_id = %s",
+                            (author.first_name, author.last_name, author.bio, author.id))
+        
+        if self.cursor.rowcount == 0:
+            return False
+        self.db.commit()
+        return True
     
     def _delete_author(self, author_id: int) -> bool:
         """
         Delete author
         """
-        raise NotImplementedError
+        self.cursor.execute("DELETE FROM Authors WHERE author_id = %s", (author_id,))
+        if self.cursor.rowcount == 0:
+            return False
+        self.db.commit()
+        return True
+    
+    def _result_to_author(self, result) -> Author:
+        """
+        Convert result to author
+        """
+        author = Author(result[0], result[1], result[2], result[3])
+        return author
     
     def get_author_by_id(self, author_id: int) -> Author:
         """
         Get author by author id
         """
-        raise NotImplementedError
+        self.cursor.execute("SELECT * FROM Authors WHERE author_id = %s", (author_id,))
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        return self._result_to_author(result)
+    
+    def get_authors_by_ids(self, author_ids: list) -> list:
+        """
+        Get authors by author ids
+        """
+        authors = []
+        self.cursor.execute("SELECT * FROM Authors WHERE author_id IN (%s)" % ",".join(author_ids))
+        for result in self.cursor:
+            authors.append(self._result_to_author(result))
+        return authors
+        
     
     def get_author_by_name(self, first_name: str, last_name: str) -> Author:
         """
         Get author by name
         """
-        raise NotImplementedError
+        self.cursor.execute("SELECT * FROM Authors WHERE last_name = %s", (last_name,))
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        
+        # clear result
+        self.cursor.fetchall()
+        a = self._result_to_author(result)
+        return a
     
     def _update_session_id(self, user_id: int, session_id: str, session_timeout:int) -> bool:
         """
         Update session id
         """
-        raise NotImplementedError
+        user = self._get_user_by_id(user_id)
+        if user is None:
+            return False
+        self.cursor.execute("UPDATE User SET session_id = %s, session_time = %s WHERE user_id = %s", (session_id, session_timeout, user_id))
+
+        if self.cursor.rowcount == 0:
+            return False
+        self.db.commit()
+        return True

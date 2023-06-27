@@ -60,7 +60,7 @@ class User:
         }
     
 class AudioContent:
-    def __init__(self, content_id:int, audio_type:int, title:str, author_id:int, categories:str, series:str, duration:int, rating:float, price:int, cover_file:str, releaseDate:int, addedDate:int, series_index:int):
+    def __init__(self, content_id:int, audio_type:int, title:str, author_id:int, categories:list, series:str, duration:int, rating:float, price:int, cover_file:str, releaseDate:int, addedDate:int, series_index:int):
         self.content_id = content_id
         self.title = title
         self.author_id = author_id

@@ -130,6 +130,12 @@ class AbstractAudioManager:
         """
         raise NotImplementedError
     
+    def get_authors_by_ids(self, author_ids: list) -> list:
+        """
+        Get authors by author ids
+        """
+        raise NotImplementedError
+    
     def get_author_by_name(self, first_name: str, last_name: str) -> Author:
         """
         Get author by name
@@ -193,7 +199,9 @@ class AbstractAudioManager:
         library = [item.to_dict() for item in library]
 
         # get authors
-        authors = {}
+        author_ids = set([str(item["author_id"]) for item in library])
+        authors = self.get_authors_by_ids(author_ids)
+        authors = {author.author_id: author for author in authors}
         for item in library:
             author_id = item["author_id"]
             if author_id not in authors:

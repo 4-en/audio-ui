@@ -5,7 +5,7 @@ import './library.css';
 import './Login.css';
 import LibMenu from './LibMenu';
 import React from 'react';
-import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
+import { Route, Routes, BrowserRouter as Router, Navigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Home from './Home';
 import Login from './Login';
@@ -51,6 +51,7 @@ class App extends React.Component {
     this.state = {
       user: null,
       apiAvailable: true,
+      redirect: null,
     };
 
     this.myMenu = React.createRef();
@@ -138,12 +139,50 @@ class App extends React.Component {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  redirect(path) {
+    this.setState({ redirect: path });
+  }
+
+
+  async register(username, password, email) {
+    const response = await this.apiRequest("/register", "POST", { username: username, password: password, email: email });
+    const data = await response.json();
+    console.log(data);
+    if (response.status === 200) {
+      
+      return await this.login(username, password);
+      
+    }
+    else {
+      return false;
+    }
+  }
+
   async login(username, password) {
     const response = await this.apiRequest("/login", "POST", { username: username, password: password });
     const data = await response.json();
     console.log(data);
     if (response.status === 200) {
       this.setState({ user: data.user });
+      this.redirect("/");
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  async logout() {
+    if (this.state.user === null) {
+      return false;
+    }
+    const sid = this.state.user.session_id;
+    const response = await this.apiRequest("/logout", "POST", { session_id: sid });
+    const data = await response.json();
+    console.log(data);
+    if (response.status === 200) {
+      this.setState({ user: null });
+      this.redirect("/");
       return true;
     }
     else {
@@ -153,6 +192,15 @@ class App extends React.Component {
 
 
   render() {
+
+    let redirect = null;
+    if (this.state.redirect) {
+      redirect = this.state.redirect;
+      this.setState({ redirect: null });
+      // Router link to path
+      
+    }
+
 
     let home = <Home library={this} />;
 
@@ -166,15 +214,16 @@ class App extends React.Component {
     return (
 
       <Router>
-        <Navbar app={this} />
+        <Navbar user={this.state.user} app={this} />
         <div className="AudioUI">
+          {redirect === null ? null : <Navigate to={redirect} />}
           <Routes>
             <Route path="/" element={home} />
-            <Route path="/library" element={<LibMenu app={this} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
+            <Route path="/library" user={this.state.user} element={<LibMenu app={this} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
             <Route path="/login" element={<Login app={this} />} />
             <Route path="/register" element={<Register app={this} />} />
-            <Route path="/store" element={<Store app={this} />} />
-            <Route path="/admin" element={<AdminStore app={this} />} />
+            <Route path="/store" user={this.state.user} element={<Store app={this} />} />
+            <Route path="/admin" user={this.state.user} element={<AdminStore app={this} />} />
           </Routes>
         </div>
       </Router>
