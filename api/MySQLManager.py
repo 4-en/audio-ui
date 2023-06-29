@@ -172,31 +172,52 @@ class MySQLManager(AbstractAudioManager):
         if result is None:
             return None
         return self._result_to_user(result)
-    
+
     def _create_user_item(self, user_content:UserContent) -> UserContent:
         """
         Create user item
         """
-        raise NotImplementedError
+        res = self.cursor.execute("SELECT * FROM UserContent WHERE user_id = %s AND audio_id = %s", (user_content.user_id, user_content.audio_id))
+        if res is not None:
+            self.cursor.execute("INSERT INTO UserContent (user_id, audio_id, progress, rating, status, last_played) VALUES (%s, %s, %s, %s, %s, %s)", (user_content.user_id, user_content.audio_id, user_content.progress, user_content.rating, user_content.status, user_content.last_played))
+        
+        return self._get_user_item_by_id(self.cursor.lastrowid)      
     
     def _get_user_library(self, user_id: int) -> list:
         """
         Get user library by user id
         """
-        return []
+        user_library = []
+        self.cursor.execute("SELECT * FROM UserContent WHERE user_id = %s", (user_id,))
+        for result in self.cursor:
+            user_library.append(self._result_to_user_item(result))
+        return user_library
 
     def _edit_user_item(self, user_content:UserContent) -> bool:
         """
         Edit user item
         """
-        raise NotImplementedError
+        res = self.cursor.execute("SELECT * FROM UserContent WHERE userContent_id = %s", (user_content.id,))
+    
+        if self.cursor.rowcount == 0:
+            return False
+        if res.user_id != user_content.user_id:
+            return False
+        
+        self.cursor.execute("UPDATE UserContent SET user_id = %s, audio_id = %s, progress = %s, rating = %s, status = %s, last_played = %s WHERE userContent_id = %s",user_content.user_id, user_content.audio_id, user_content.progress, user_content.rating, user_content.status, user_content.last_played, user_content.id)
+        self.db.commit()
+        return True
 
     def _delete_user_item(self, user_content_id: int) -> bool:
         """
         Delete user item
         """
-        raise NotImplementedError
-    
+        res=self.cursor.execute("SELECT * FROM UserContent WHERE userContent_id = %s", (user_content_id,))
+        if self.cursor.rowcount == 0:
+            return False
+        self.cursor.execute("DELETE FROM UserContent WHERE userContent_id = %s", (user_content_id,))
+        return True
+       
     def _result_to_store_item(self, result) -> AudioContent:
         """
         Convert result to store item

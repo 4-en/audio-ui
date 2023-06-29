@@ -28,10 +28,6 @@ class Login extends React.Component {
     } 
         
     
-   
-    
- // <img src={password} alt="password" className="email" />
-// <img src={password} alt="password" className="email" />
     render() {
         
         return (
