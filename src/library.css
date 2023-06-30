@@ -576,3 +576,69 @@
     border-radius: 5px;
     margin: 10px;
 }
+
+
+.editItemDialog {
+    padding: 20px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 500px;
+    transform: translate(-50%, -50%);
+    background-color: var(--bg-color);
+    border-radius: 20px;
+    border: 1px solid var(--text-color);
+
+}
+
+.editItemDialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.editItemHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    color: var(--text-color);
+    font-size: 22px;
+}
+
+.editItemContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--text-color);
+    justify-content: center;
+}
+
+.editItemRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.editItemRowName {
+    width: 100px
+}
+
+editItemRowValue {
+    width: 100px
+}
+
+editItemRowValue * {
+    color: var(--text-color);
+    border-radius: 5px;
+    border: 1px solid var(--text-color);
+}
+
+.editItemButtons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    margin-top: 20px;
+}

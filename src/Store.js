@@ -94,6 +94,7 @@ class EditItemView extends React.Component {
         return (
             <dialog className="editItemDialog" id="editItemDialog">
                 <div className="editItemHeader">
+                    {this.state.mode === "create" ? "Create Item" : "Edit Item"}
                     <button className="al-button" onClick={() => { this.close(); }}>Close</button>
                 </div>
                 {this.getInner()}
