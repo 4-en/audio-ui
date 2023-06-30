@@ -625,14 +625,15 @@
     width: 100px
 }
 
-editItemRowValue {
-    width: 100px
+.editItemRowValue {
+    width: 250px
 }
 
-editItemRowValue * {
+.editItemRowValue * {
     color: var(--text-color);
     border-radius: 5px;
     border: 1px solid var(--text-color);
+    padding: 5px;
 }
 
 .editItemButtons {
