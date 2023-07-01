@@ -10,35 +10,11 @@ import Navbar from './Navbar';
 import Home from './Home';
 import Login from './Login';
 import Store from './Store';
-import AdminStore from './AdminStore';
 import NoApi from './NoApi';
 import Register from './Register';
 //import {Login} from "./Login";
 //import {Login} from "./Register";
 
-
-/*
-  Library entry structure:
-
-  entry = {
-                "title": faker.sentence(nb_words=3),
-                "author": {
-                    "first_name": faker.first_name(),
-                    "last_name": faker.last_name(),
-                    "bio": faker.paragraph(nb_sentences=3),
-                }
-                "category": [category],
-                "series": series,
-                "type": type,
-                "description": faker.paragraph(nb_sentences=3),
-                "duration": random.randint(1, 1000),
-                "rating": random.random() * 4 + 1,
-                "price": round( random.random() * 20 + 5.99, 2),
-                "cover": ""
-            }
-
-
-*/
 
 
 
@@ -223,7 +199,6 @@ class App extends React.Component {
             <Route path="/login" element={<Login app={this} />} />
             <Route path="/register" element={<Register app={this} />} />
             <Route path="/store" user={this.state.user} element={<Store app={this} />} />
-            <Route path="/admin" user={this.state.user} element={<AdminStore app={this} />} />
           </Routes>
         </div>
       </Router>
