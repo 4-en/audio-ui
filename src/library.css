@@ -647,3 +647,22 @@
 .editButtonMarginR {
     margin-right: 20px;
 }
+
+.store_header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: right;
+    margin-bottom: 20px;
+    color: var(--text-color);
+    font-size: 22px;
+}
+
+.store_header * {
+    margin-left: 20px;
+}
+
+.chargeBalanceButton {
+    text-decoration: none;
+
+}

@@ -81,7 +81,7 @@ class EditItemView extends React.Component {
 
     updateItem() {
         let item = this.state.item;
-            
+
         let title = document.getElementById("editStoreItemTitle").value;
         if (title !== "") {
             item.title = title;
@@ -98,13 +98,13 @@ class EditItemView extends React.Component {
         if (series_index !== "") {
             // to int
             try {
-            item.series_index = parseInt(series_index);
+                item.series_index = parseInt(series_index);
             } catch (e) {
                 if (series !== "") {
                     console.log(e);
                     return "Series index must be a number";
                 }
-                
+
             }
         }
 
@@ -139,7 +139,7 @@ class EditItemView extends React.Component {
             let date = new Date(releaseDate);
             // get the unix timestamp
             let releaseSeconds = Math.floor(date.getTime() / 1000);
-            if(isNaN(releaseSeconds)) {
+            if (isNaN(releaseSeconds)) {
                 return "Release date must be a valid date";
             }
             item["releaseDate"] = releaseSeconds;
@@ -167,7 +167,7 @@ class EditItemView extends React.Component {
                     }
                 }
 
-                if(isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
+                if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
                     return "Duration must be a number in the format xh ym zs";
                 }
 
@@ -199,14 +199,14 @@ class EditItemView extends React.Component {
                     }
                 }
 
-                
+
                 // join
                 price = split.join("");
-                
-                
+
+
                 // to int
                 price = parseInt(price);
-                
+
                 // check if nan
                 if (isNaN(price)) {
                     return "Price must be a number in the format 0.00";
@@ -264,7 +264,7 @@ class EditItemView extends React.Component {
         let durationH = Math.floor(this.state.item.duration / 3600);
         let durationM = Math.floor((this.state.item.duration - durationH * 3600) / 60);
         let durationS = this.state.item.duration - durationH * 3600 - durationM * 60;
-        let duration = durationH + "h " + durationM + "m " + durationS+"s";
+        let duration = durationH + "h " + durationM + "m " + durationS + "s";
 
         let releaseDate = new Date(this.state.item.releaseDate * 1000);
         let releaseDateString = releaseDate.getFullYear() + "-" + (releaseDate.getMonth() + 1) + "-" + releaseDate.getDate();
@@ -402,13 +402,13 @@ class Store extends React.Component {
             },
             categories: [],
             series: "",
-            duration: 60*60,
+            duration: 60 * 60,
             rating: 0,
             price: 1000,
             cover_file: "no-cover",
             releaseDate: Math.floor(Date.now() / 1000),
             series_index: 0
-            
+
         }
 
         this.editItemView.current.showCreate(newItem);
@@ -430,19 +430,15 @@ class Store extends React.Component {
 
         return (
             <div className="Store">
-                {isAdmin ? <div>
-                    <EditItemView ref={this.editItemView} item={null} />
-                    <button className="al-button createItemButton" onClick={(e) => { this.createItem(e); }}>Create Item</button>
-                </div> : null}
                 {this.state.username === "null" ? null :
                     <div className="store_header">
 
-                        <div>
-                            Username: {this.state.username}
-                        </div>
-                        <div>
-                            Balance: {getPriceString(this.state.balance)}
-                        </div>
+                        {isAdmin ? <div>
+                            <EditItemView ref={this.editItemView} item={null} />
+                            <button className="rightPanelBuyButton" onClick={(e) => { this.createItem(e); }}>Create Item</button>
+                        </div> : null}
+
+                        <Link to="/charge" className="rightPanelBuyButton chargeBalanceButton">{getPriceString(this.state.balance)}</Link>
 
 
 

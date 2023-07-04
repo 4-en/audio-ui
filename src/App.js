@@ -12,6 +12,7 @@ import Login from './Login';
 import Store from './Store';
 import NoApi from './NoApi';
 import Register from './Register';
+import Charge from './Charge';
 //import {Login} from "./Login";
 //import {Login} from "./Register";
 
@@ -199,6 +200,7 @@ class App extends React.Component {
             <Route path="/login" element={<Login app={this} />} />
             <Route path="/register" element={<Register app={this} />} />
             <Route path="/store" user={this.state.user} element={<Store app={this} />} />
+            <Route path="/charge" user={this.state.user} element={<Charge app={this} />} />
           </Routes>
         </div>
       </Router>
