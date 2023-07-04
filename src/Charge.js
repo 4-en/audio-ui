@@ -11,10 +11,24 @@ class Charge extends React.Component {
 
     async charge(amount) {
         // charge user balance
+        const user = this.props.app.state.user;
+        if (user === null) {
+            this.props.app.redirect("/store");
+            return;
+        }
 
+        const sid = user.session_id;
 
-        alert("Charged " + amount + "€");
-        this.props.app.redirect("/store");
+        const resp = await this.props.app.apiRequest("/charge", "POST", { amount: amount, session_id: sid });
+        const data = await resp.json();
+        if (resp.status === 200) {
+            this.props.app.redirect("/store");
+        } else {
+            console.log(data);
+            this.props.app.redirect("/store");
+        }
+        
+        
     }
 
     render() {
@@ -22,10 +36,10 @@ class Charge extends React.Component {
             <div className="chargeContainer">
                 <h2>Recharge your balance</h2>
                 <div className="chargeButtonContainer">
-                    <button className="chargeButton" onClick={async () => { await this.charge(10); }}>10€</button>
-                    <button className="chargeButton" onClick={async () => { await this.charge(20); }}>20€</button>
-                    <button className="chargeButton" onClick={async () => { await this.charge(50); }}>50€</button>
-                    <button className="chargeButton" onClick={async () => { await this.charge(100); }}>100€</button>
+                    <button className="chargeButton" onClick={async () => { await this.charge(1000); }}>10€</button>
+                    <button className="chargeButton" onClick={async () => { await this.charge(2000); }}>20€</button>
+                    <button className="chargeButton" onClick={async () => { await this.charge(5000); }}>50€</button>
+                    <button className="chargeButton" onClick={async () => { await this.charge(10000); }}>100€</button>
                 </div>
             </div>
         );

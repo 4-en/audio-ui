@@ -423,6 +423,7 @@ class LibMenu extends React.Component {
         let filterButtons = [];
         let i = 0;
         for (let type in MenuType) {
+            if (type === "AUTHORS") continue;
             let className = 'al-button filter-button ';
             if (this.state.type === MenuType[type]) {
                 className += 'button-selected';

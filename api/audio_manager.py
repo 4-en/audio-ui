@@ -478,6 +478,18 @@ class AbstractAudioManager:
         self.notify_user_change(user.user_id)
         return "https://dorar.at/LARGE/PuretuneMp3/73lbS7hNl1pwN3Tch56zYg/1685383200/201405/171.mp3"
     
+    def charge_user(self, session_id: str, amount: int) -> bool:
+        """
+        Charge user balance
+        """
+        user = self._get_user_by_session_id(session_id)
+        if user is None or user.check_session(session_id) is False:
+            return False
+        user.balance += amount
+        self._edit_user(user)
+        self.notify_user_change(user.user_id)
+        return True
+    
     
 
     ### admin functions

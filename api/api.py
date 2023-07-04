@@ -96,6 +96,10 @@ class UserStateRequest(BaseModel):
 class StateResponse(BaseModel):
     state: int = -1
 
+class ChargeRequest(BaseModel):
+    session_id: str
+    amount: int
+
 
 class AudioAPI:
     def __init__(self, audioManager:AbstractAudioManager, host:str="localhost", port:int=3456) -> None:
@@ -288,6 +292,26 @@ class AudioAPI:
                 raise HTTPException(status_code=401, detail="Invalid session id")
             
             return ItemResponse(item=edit)
+        
+        @self.app.post("/delete_item/")
+        async def delete_item(delete_item_request: PlayRequest) -> StatusResponse:
+            delete = self.audioManager.delete_store_item(
+                delete_item_request.session_id,
+                delete_item_request.item_id
+            )
+            if delete is None:
+                raise HTTPException(status_code=401, detail="Invalid session id")
+            return StatusResponse(status=delete, message="Item deleted")
+        
+        @self.app.post("/charge/")
+        async def charge(charge_request: ChargeRequest) -> StatusResponse:
+            charge = self.audioManager.charge_user(
+                charge_request.session_id,
+                charge_request.amount
+            )
+            if charge is None:
+                raise HTTPException(status_code=401, detail="Invalid session id")
+            return StatusResponse(status=charge, message="User charged")
 
 
 

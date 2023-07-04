@@ -117,7 +117,7 @@ class MySQLManager(AbstractAudioManager):
         Edit user
         """
         self.cursor.execute("UPDATE User SET name = %s, password = %s, salt = %s, email = %s, balance = %s, admin = %s, join_date = %s WHERE user_id = %s", 
-                            (user.username, user.passhash, user.salt, user.email, user.balance, user.admin, user.created, user.id))
+                            (user.username, user.passhash, user.salt, user.email, user.balance, user.admin, user.created, user.user_id))
         # check result
         if self.cursor.rowcount == 0:
             return False
