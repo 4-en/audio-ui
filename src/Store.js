@@ -251,12 +251,14 @@ class EditItemView extends React.Component {
         series_index: int
         */
         let categories = "";
+        console.log(this.state.item.categories);
         for (let i = 0; i < this.state.item.categories.length; i++) {
-            categories += this.state.item.categories[i].name;
+            categories += this.state.item.categories[i];
             if (i < this.state.item.categories.length - 1) {
                 categories += ", ";
             }
         }
+        console.log(categories);
 
         let author = this.state.item.author.first_name + " " + this.state.item.author.last_name;
         let durationH = Math.floor(this.state.item.duration / 3600);
@@ -273,15 +275,6 @@ class EditItemView extends React.Component {
 
         return (
             <div className="editItemContent">
-                {/*{this.createRow("Title", <input type="text" value={this.state.item.name} onChange={(e) => { this.changeKV("title", e.target.value); }} />)}
-                {this.createRow("Series", <input type="text" value={this.state.item.series} onChange={(e) => { this.changeKV("series", e.target.value); }} />)}
-                {this.createRow("Series Index", <input type="text" value={this.state.item.series_index} onChange={(e) => { this.changeKV("series_index", e.target.value); }} />)}
-                {this.createRow("Author", <input type="text" value={author} onChange={(e) => { this.changeKV("author", e.target.value); }} />)}
-                {this.createRow("Categories", <input type="text" value={categories} onChange={(e) => { this.changeKV("categories", e.target.value); }} />)}
-                {this.createRow("Duration", <input type="text" value={this.state.item.duration} onChange={(e) => { this.changeKV("duration", e.target.value); }} />)}
-                {this.createRow("Release Date", <input type="text" value={this.state.item.releaseDate} onChange={(e) => { this.changeKV("releaseDate", e.target.value); }} />)}
-                {this.createRow("Price", <input type="text" value={this.state.item.price} onChange={(e) => { this.changeKV("price", e.target.value); }} />)}
-        */}
                 {this.createRow("Title", <input id="editStoreItemTitle" type="text" defaultValue={this.state.item.title} />)}
                 {this.createRow("Series", <input id="editStoreItemSeries" type="text" defaultValue={this.state.item.series} />)}
                 {this.createRow("Series Index", <input id="editStoreItemSeriesIndex" type="text" defaultValue={this.state.item.series_index} />)}
@@ -294,7 +287,7 @@ class EditItemView extends React.Component {
         );
     }
 
-    createItem() {
+    async createItem() {
         let item = this.updateItem();
 
         // check if item is string
@@ -302,6 +295,8 @@ class EditItemView extends React.Component {
             // error
             this.setState({ error: item });
             return;
+        } else {
+            this.setState({ error: null });
         }
 
         // alert
@@ -309,13 +304,39 @@ class EditItemView extends React.Component {
 
     }
 
+    async editItem() {
+        let item = this.updateItem();
+
+        // check if item is string
+        if (typeof item === "string") {
+            // error
+            this.setState({ error: item });
+            return;
+        } else {
+            this.setState({ error: null });
+        }
+
+        // api call
+        console.log(item);
+    }
+
+    async deleteItem() {
+        // api call
+        console.log("delete");
+        const id = this.state.item.id;
+
+        // delete item with id
+
+    }
+
+
 
     getButtons() {
         if (this.state.mode === "create") {
             return (
                 <div className="editItemButtons">
                     <button className="al-button" onClick={() => { this.close(); }}>Cancel</button>
-                    <button className="al-button" onClick={() => { this.createItem(); }}>Create</button>
+                    <button className="al-button" onClick={async () => { await this.createItem(); }}>Create</button>
                 </div>
             );
 
@@ -323,8 +344,8 @@ class EditItemView extends React.Component {
             return (
                 <div className="editItemButtons">
                     <button className="al-button" onClick={() => { this.close(); }}>Cancel</button>
-                    <button className="al-button" onClick={() => { this.close(); }}>Save</button>
-                    <button className="al-button" onClick={() => { this.close(); }}>Delete</button>
+                    <button className="al-button" onClick={async () => { await this.editItem(); }}>Edit</button>
+                    <button className="al-button" onClick={async () => { await this.deleteItem(); }}>Delete</button>
                 </div>
             );
         }
@@ -357,7 +378,7 @@ class Store extends React.Component {
             balance: 0
         }
 
-        this.editItem = React.createRef();
+        this.editItemView = React.createRef();
 
 
 
@@ -390,18 +411,27 @@ class Store extends React.Component {
             
         }
 
-        this.editItem.current.showCreate(newItem);
+        this.editItemView.current.showCreate(newItem);
 
+    }
+
+    editItem(item) {
+        this.editItemView.current.showEdit(item);
     }
 
     render() {
 
         let isAdmin = true;
+        if (this.props.app.state.user !== null) {
+            isAdmin = this.props.app.state.user.admin;
+        } else {
+            isAdmin = false;
+        }
 
         return (
             <div className="Store">
                 {isAdmin ? <div>
-                    <EditItemView ref={this.editItem} item={null} />
+                    <EditItemView ref={this.editItemView} item={null} />
                     <button className="al-button createItemButton" onClick={(e) => { this.createItem(e); }}>Create Item</button>
                 </div> : null}
                 {this.state.username === "null" ? null :

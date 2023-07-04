@@ -184,6 +184,15 @@ class StorePanel extends React.Component {
     dialog.close();
   }
 
+  async clickEdit(e) {
+    e.stopPropagation();
+    if(this.entry === null) {
+      return;
+    }
+
+    this.props.libMenu.props.store.editItem(this.entry);
+  }
+
 
 
   render() {
@@ -230,7 +239,11 @@ class StorePanel extends React.Component {
         </div>
         <div className="rightPanelBottom">
           <div className="rightPanelBuy">
+            {this.user !== null && this.user.admin ?
+            <button onClick={(e) => this.clickEdit(e)} className={buttonClass+" editButtonMarginR"}>Edit</button>
+            : null}
             <button onClick={(e) => this.clickBuy(e)} className={buttonClass}>{buttonText}</button>
+  
           </div>
         </div>
       </div>
