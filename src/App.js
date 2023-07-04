@@ -21,7 +21,7 @@ import Charge from './Charge';
 
 
 class App extends React.Component {
-  
+
   constructor(props) {
     super(props);
 
@@ -40,7 +40,7 @@ class App extends React.Component {
       const timer = setTimeout(() => {
         reject(new Error('Request timed out'));
       }, timeout);
-      
+
       fetch(url, options)
         .then(response => {
           clearTimeout(timer);
@@ -54,6 +54,20 @@ class App extends React.Component {
   }
 
   async componentDidMount() {
+
+    // try to login with session id from local storage
+    const session_id = localStorage.getItem("session_id");
+    if (session_id) {
+      const response = await this.apiRequest("/user", "POST", { session_id: session_id });
+      const data = await response.json();
+      if (response.status === 200) {
+        this.setState({ user: data.user });
+      } else {
+        localStorage.removeItem("session_id");
+      }
+    }
+
+
     // check if API is available
 
     return;
@@ -62,7 +76,7 @@ class App extends React.Component {
     const maxTries = 3;
     while (tries < maxTries) {
       try {
-        let response = await this.fetchTimeout(this.getAPIAddress() + "/", { 
+        let response = await this.fetchTimeout(this.getAPIAddress() + "/", {
           method: "GET",
           headers: {
             'Content-Type': 'application/json',
@@ -70,7 +84,7 @@ class App extends React.Component {
             'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
             'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
           }
-         }, 1000);
+        }, 1000);
         if (response.status === 200) {
           break;
         }
@@ -102,7 +116,7 @@ class App extends React.Component {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
-        
+
       }
     };
     if (body) {
@@ -126,9 +140,9 @@ class App extends React.Component {
     const data = await response.json();
     console.log(data);
     if (response.status === 200) {
-      
+
       return await this.login(username, password);
-      
+
     }
     else {
       return false;
@@ -141,6 +155,10 @@ class App extends React.Component {
     console.log(data);
     if (response.status === 200) {
       this.setState({ user: data.user });
+
+      // set session in local storage
+      localStorage.setItem("session_id", data.user.session_id);
+
       this.redirect("/");
       return true;
     }
@@ -175,7 +193,7 @@ class App extends React.Component {
       redirect = this.state.redirect;
       this.setState({ redirect: null });
       // Router link to path
-      
+
     }
 
 
@@ -196,11 +214,11 @@ class App extends React.Component {
           {redirect === null ? null : <Navigate to={redirect} />}
           <Routes>
             <Route path="/" element={home} />
-            <Route path="/library" user={this.state.user} element={<LibMenu app={this} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
+            <Route path="/library" element={<LibMenu app={this} user={this.state.user} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
             <Route path="/login" element={<Login app={this} />} />
             <Route path="/register" element={<Register app={this} />} />
-            <Route path="/store" user={this.state.user} element={<Store app={this} />} />
-            <Route path="/charge" user={this.state.user} element={<Charge app={this} />} />
+            <Route path="/store" element={<Store app={this} user={this.state.user} />} />
+            <Route path="/charge" element={<Charge app={this} user={this.state.user} />} />
           </Routes>
         </div>
       </Router>

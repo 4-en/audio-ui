@@ -422,15 +422,15 @@ class Store extends React.Component {
     render() {
 
         let isAdmin = true;
-        if (this.props.app.state.user !== null) {
-            isAdmin = this.props.app.state.user.admin;
+        if (this.props.user !== null) {
+            isAdmin = this.props.user.admin;
         } else {
             isAdmin = false;
         }
 
         return (
             <div className="Store">
-                {this.state.username === "null" ? null :
+                {this.props.user === null ? null :
                     <div className="store_header">
 
                         {isAdmin ? <div>
@@ -438,7 +438,7 @@ class Store extends React.Component {
                             <button className="rightPanelBuyButton" onClick={(e) => { this.createItem(e); }}>Create Item</button>
                         </div> : null}
 
-                        <Link to="/charge" className="rightPanelBuyButton chargeBalanceButton">{getPriceString(this.state.balance)}</Link>
+                        <Link to="/charge" className="rightPanelBuyButton chargeBalanceButton">{getPriceString(this.props.user.balance)}</Link>
 
 
 
