@@ -299,8 +299,34 @@ class EditItemView extends React.Component {
             this.setState({ error: null });
         }
 
+        // api call
+        const res = await this.props.app.apiRequest("/create_item", "POST",{
+            session_id: this.props.app.state.user.session_id,
+            item_audio_type: item.audio_type,
+            item_title: item.title,
+            item_author_first_name: item.author.first_name,
+            item_author_last_name: item.author.last_name,
+            item_author_bio: item.author.bio,
+            item_categories: item.categories,
+            item_series: item.series,
+            item_duration: item.duration,
+            item_rating: item.rating,
+            item_price: item.price,
+            item_cover_file: item.cover_file,
+            item_release_date: item.releaseDate,
+            item_series_index: item.series_index
+        });
+
+        if (res.status !== 200) {
+            // error
+            this.setState({ error: res.message });
+            return;
+        }
+
         // alert
         alert("Created item: " + item.title);
+
+        this.close();
 
     }
 
@@ -316,16 +342,57 @@ class EditItemView extends React.Component {
             this.setState({ error: null });
         }
 
+        const id = this.state.item.content_id;
+
         // api call
-        console.log(item);
+        const res = await this.props.app.apiRequest("/edit_item", "POST",{
+            session_id: this.props.app.state.user.session_id,
+            item_id: id,
+            changes: {
+                title: item.title,
+                price: item.price,
+                series: item.series,
+                series_index: item.series_index,
+                releaseDate: item.releaseDate,
+                duration: item.duration,
+                categories: item.categories
+            }
+        });
+
+        if (res.status !== 200) {
+            // error
+            this.setState({ error: res.message });
+            return;
+        }
+
+        // alert
+        alert("Changed item: " + item.title);
+
+        this.close();
     }
 
     async deleteItem() {
         // api call
         console.log("delete");
-        const id = this.state.item.id;
+        const id = this.state.item.content_id;
+        console.log(id);
 
         // delete item with id
+        const res = await this.props.app.apiRequest("/delete_item", "POST",{
+            session_id: this.props.app.state.user.session_id,
+            item_id: id
+        });
+
+        if (res.status !== 200) {
+            // error
+            this.setState({ error: res.message });
+            return;
+        }
+
+        // alert
+        alert("Deleted item with id: " + id);
+
+        this.close();
 
     }
 
@@ -405,7 +472,7 @@ class Store extends React.Component {
             duration: 60 * 60,
             rating: 0,
             price: 1000,
-            cover_file: "no-cover",
+            cover_file: "no-cover.jpg",
             releaseDate: Math.floor(Date.now() / 1000),
             series_index: 0
 
@@ -434,7 +501,7 @@ class Store extends React.Component {
                     <div className="store_header">
 
                         {isAdmin ? <div>
-                            <EditItemView ref={this.editItemView} item={null} />
+                            <EditItemView ref={this.editItemView} app={this.props.app} item={null} />
                             <button className="rightPanelBuyButton" onClick={(e) => { this.createItem(e); }}>Create Item</button>
                         </div> : null}
 

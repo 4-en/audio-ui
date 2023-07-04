@@ -283,9 +283,9 @@ class MySQLManager(AbstractAudioManager):
                              audioContent.rating, 
                              audioContent.releaseDate, 
                              audioContent.addedDate, 
-                             audioContent.id))
+                             audioContent.content_id))
         self.db.commit()
-        return self._get_store_item_by_id(audioContent.id)
+        return self._get_store_item_by_id(audioContent.content_id)
         
     
     def _delete_store_item(self, item_id: int) -> bool:

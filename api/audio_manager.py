@@ -590,7 +590,7 @@ class AbstractAudioManager:
         if not self.is_admin(session_id):
             return None
         
-        item = self.get_store_item_by_id(item_id)
+        item = self._get_store_item_by_id(item_id)
         if item is None:
             return None
         for key in changes:
