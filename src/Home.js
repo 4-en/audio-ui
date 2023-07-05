@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import './Home.css';
 import './App.css' ;
 //import AudioBild from './images/AudioBild.jpg'
-import Button from 'react-bootstrap/Button';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Carousel from 'react-bootstrap/Carousel';
+//import Button from 'react-bootstrap/Button';
+//import 'bootstrap/dist/css/bootstrap.min.css';
+//import Carousel from 'react-bootstrap/Carousel';
 
 
 
