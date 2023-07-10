@@ -177,11 +177,32 @@ class MySQLManager(AbstractAudioManager):
         """
         Create user item
         """
-        res = self.cursor.execute("SELECT * FROM UserContent WHERE user_id = %s AND audio_id = %s", (user_content.user_id, user_content.audio_id))
-        if res is not None:
-            self.cursor.execute("INSERT INTO UserContent (user_id, audio_id, progress, rating, status, last_played) VALUES (%s, %s, %s, %s, %s, %s)", (user_content.user_id, user_content.audio_id, user_content.progress, user_content.rating, user_content.status, user_content.last_played))
-        
-        return self._get_user_item_by_id(self.cursor.lastrowid)      
+        self.cursor.execute("SELECT * FROM UserContent WHERE user_id = %s AND content_id = %s", (user_content.user_id, user_content.content_id))
+        res = self.cursor.fetchone()
+        if res is None:
+            self.cursor.execute("INSERT INTO UserContent (user_id, content_id, progress, rating, purchase_date, last_played) VALUES (%s, %s, %s, %s, %s, %s)", (user_content.user_id, user_content.content_id, user_content.progress, user_content.rating, user_content.purchased, user_content.last_played))
+            if self.cursor.rowcount == 0:
+                return None
+            print("Commiting...")
+            self.db.commit() 
+        return self._get_user_item_by_id(self.cursor.lastrowid)   
+
+    def _result_to_user_item(self, result) -> UserContent:
+        """
+        Convert result to user item
+        """
+        uc = UserContent(result[0], result[1], result[2], result[3], result[4], result[5], result[6])
+        return uc
+    
+    def _get_user_item_by_id(self, user_content_id: int) -> UserContent:
+        """
+        Get user item by id
+        """
+        self.cursor.execute("SELECT * FROM UserContent WHERE user_content_id = %s", (user_content_id,))
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        return self._result_to_user_item(result)
     
     def _get_user_library(self, user_id: int) -> list:
         """

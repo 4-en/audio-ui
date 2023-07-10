@@ -302,6 +302,7 @@ class AbstractAudioManager:
             return None
         user_content.sort(key=lambda x: x.content_id)
         store_content = self.get_store_library()
+        print(user_content)
         if store_content is None:
             return None
         user_library = []
@@ -341,7 +342,7 @@ class AbstractAudioManager:
         """
         user = self._get_user_by_session_id(session_id)
         if user is None or user.check_session(session_id) is False:
-            return None
+            return None, None
         return self.get_user_state(user.user_id), self._get_user_library_by_id(user.user_id)
 
     def get_user_item_by_session_id(self, session_id: str, item_id: int) -> dict:

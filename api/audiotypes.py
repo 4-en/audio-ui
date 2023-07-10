@@ -119,7 +119,7 @@ class UserContent:
 
     @classmethod
     def create_new(cls, user_id:int, content_id:int):
-        return cls(-1, user_id, content_id, -1, 0, int(time.time()), -1)
+        return cls(-1, user_id, content_id, -1, 0, int(time.time()), 0)
     
     def to_dict(self):
         return {
