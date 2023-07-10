@@ -34,27 +34,57 @@ class LibPlayer extends React.Component {
             volume: 0.5,
             muted: false
         };
+
+        this.audio = null;
     }
 
-    setEntry(entry) {
+    async componentDidMount() {
+        
+
+    }
+
+    async loadAudio(id) {
+        // get audio url
+        var res = await this.props.app.apiRequest('/play/', 'POST', 
+        { 
+            session_id: this.props.app.state.user.session_id,
+            item_id: id }
+        );
+        var json = await res.json();
+        console.log(json);
+
+        // load audio file
+        this.audio = document.getElementById('player_audio');
+
+    }
+        
+
+
+
+    async setEntry(entry) {
+        this.audio = null;
+        await this.loadAudio(entry.id);
         this.setState({ entry: entry });
-        this.play();
+        await this.play();
     }
 
-    play() {
+    async play() {
+        if(this.audio === null) {
+            await this.loadAudio(this.state.entry.id);
+        }
         this.setState({ playing: true, hidden: false });
     }
 
-    pause() {
+    async pause() {
         this.setState({ playing: false });
     }
 
-    playClick() {
+    async playClick() {
         if (this.state.playing) {
-            this.pause();
+            await this.pause();
         } else {
 
-            this.play();
+            await this.play();
         }
     }
 
@@ -95,11 +125,10 @@ class LibPlayer extends React.Component {
             </svg>
         )
 
-        const currentTime = "00:00";
+        const currentTime = "00:00"
         const maxTime = "99:99";
         const progress = "20";
 
-        console.log(this.state.entry);
 
         return (
             <div className="libPlayerContainer">
@@ -114,7 +143,7 @@ class LibPlayer extends React.Component {
                         </div>
                     </div>
                     <div className="libPlayerControls">
-                        <button className="libPlayerMainButton" onClick={() => { this.playClick(); }}>{buttonSrc}</button>
+                        <button className="libPlayerMainButton" onClick={async () => { await this.playClick(); }}>{buttonSrc}</button>
                         <div className="libPlayerTimeline">
                             <div className="libPlayerCurrent-time">{currentTime}</div>
                             <div className="libPlayerProgressOuter" onClick={(e) => { this.progressClick(e); }}>
@@ -151,8 +180,8 @@ class LibMenu extends React.Component {
         window.resetApp = this.reset.bind(this);
     }
 
-    play(entry) {
-        this.player.current.setEntry(entry);
+    async play(entry) {
+        await this.player.current.setEntry(entry);
     }
 
     isStore() {
@@ -523,7 +552,8 @@ class LibMenu extends React.Component {
                 </div>
 
                 <LibList isStore={this.isStore()} library={library} libMenu={this} ref={this.myList} />
-                {this.isStore() ? null : <LibPlayer ref={this.player} />}
+                <audio id="player_audio" autoPlay={false} />
+                {this.isStore() ? null : <LibPlayer ref={this.player} app={this.props.app} />}
             </div>
         );
     }

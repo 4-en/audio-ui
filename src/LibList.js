@@ -275,9 +275,9 @@ class LibraryPanel extends React.Component {
     super(props);
   }
 
-  play(e) {
+  async play(e) {
     e.stopPropagation();
-    this.props.libMenu.play(this.props.entry);
+    await this.props.libMenu.play(this.props.entry);
   }
 
   render() {
@@ -314,7 +314,7 @@ class LibraryPanel extends React.Component {
         </div>
         <div className="rightPanelBottom">
           <div className="rightPanelPlay">
-            <button className="rightPanelPlayButton" onClick={(e) => { this.play(e); }}><svg className="libPlayerMainButtonImg" viewBox="0 0 99 128">
+            <button className="rightPanelPlayButton" onClick={async (e) => { await this.play(e); }}><svg className="libPlayerMainButtonImg" viewBox="0 0 99 128">
               <polygon fill="currentColor" points="0 0 99 64 0 128 0 0" />
             </svg></button>
           </div>
