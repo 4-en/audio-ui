@@ -77,14 +77,20 @@ class ContentRating extends React.Component {
 
   }
 
+  async rate(rating) {
+    if(this.props.allowRating === null)
+      return;
+    // set rating
+  }
+
   render() {
     let rating = this.rating;
     const stars = [];
     for (let i = 0; i < 5; i++) {
       if (rating > 0) {
-        stars.push(<span className="libEntryStar" key={i}>{this.symbol}</span>);
+        stars.push(<span className="libEntryStar" onClick={async ()=>{await this.rate(i+1);}} key={i}>{this.symbol}</span>);
       } else {
-        stars.push(<span className="libEntryNoStar" key={i}>{this.symbol}</span>);
+        stars.push(<span className="libEntryNoStar" onClick={async ()=>{await this.rate(i+1);}} key={i}>{this.symbol}</span>);
       }
       rating--;
     }
@@ -304,7 +310,7 @@ class LibraryPanel extends React.Component {
           - Progress bar
           */}
           <div className="rightPanelRating">
-            <ContentRating rating={rating} />
+            <ContentRating rating={rating} allowRating={true} />
           </div>
           <div className="rightPanelStatus">{status}</div>
           <ProgressBar progress={progress * 100} />

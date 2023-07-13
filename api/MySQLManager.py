@@ -228,14 +228,14 @@ class MySQLManager(AbstractAudioManager):
         """
         Edit user item
         """
-        res = self.cursor.execute("SELECT * FROM UserContent WHERE userContent_id = %s", (user_content.id,))
-    
+        
+        
+        self.cursor.execute("UPDATE UserContent SET user_id = %s, content_id = %s, rating = %s, progress = %s, purchase_date = %s, last_played = %s WHERE user_content_id = %s",
+                            (user_content.user_id, user_content.content_id, user_content.rating, user_content.progress, user_content.purchased, user_content.last_played, user_content.user_content_id))
+        
         if self.cursor.rowcount == 0:
             return False
-        if res.user_id != user_content.user_id:
-            return False
         
-        self.cursor.execute("UPDATE UserContent SET user_id = %s, audio_id = %s, progress = %s, rating = %s, status = %s, last_played = %s WHERE userContent_id = %s",user_content.user_id, user_content.audio_id, user_content.progress, user_content.rating, user_content.status, user_content.last_played, user_content.id)
         self.db.commit()
         return True
 
@@ -243,10 +243,12 @@ class MySQLManager(AbstractAudioManager):
         """
         Delete user item
         """
-        res=self.cursor.execute("SELECT * FROM UserContent WHERE userContent_id = %s", (user_content_id,))
+        
+        self.cursor.execute("DELETE FROM UserContent WHERE user_content_id = %s", (user_content_id,))
+
         if self.cursor.rowcount == 0:
             return False
-        self.cursor.execute("DELETE FROM UserContent WHERE userContent_id = %s", (user_content_id,))
+        self.db.commit()
         return True
        
     def _result_to_store_item(self, result) -> AudioContent:

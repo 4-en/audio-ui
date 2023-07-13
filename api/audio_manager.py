@@ -432,7 +432,7 @@ class AbstractAudioManager:
         if user_library is None:
             return None
         for item in user_library:
-            if item.item_id == item_id:
+            if item.content_id == item_id:
                 return item
         return None
     
@@ -451,7 +451,7 @@ class AbstractAudioManager:
         count = 0
         ratings = 0
         for user_item in user_items:
-            if user_item.rating is not None:
+            if user_item.rating is not None and user_item.rating > 0:
                 ratings += user_item.rating
                 count += 1
 

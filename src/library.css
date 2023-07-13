@@ -150,6 +150,13 @@
 
 .libEntryStar {
     color: gold;
+    cursor: pointer;
+}
+
+
+.libEntryNoStar {
+    color: var(--text-color-transparent);
+    cursor: pointer;
 }
 
 .libEntryCover {

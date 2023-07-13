@@ -45,6 +45,7 @@ class LibPlayer extends React.Component {
 
     async loadAudio(id) {
         // get audio url
+        console.log(id);
         var res = await this.props.app.apiRequest('/play/', 'POST', 
         { 
             session_id: this.props.app.state.user.session_id,
@@ -63,7 +64,7 @@ class LibPlayer extends React.Component {
 
     async setEntry(entry) {
         this.audio = null;
-        await this.loadAudio(entry.id);
+        await this.loadAudio(entry.content_id);
         this.setState({ entry: entry });
         await this.play();
     }
