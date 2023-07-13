@@ -14,10 +14,50 @@ const MenuType = {
 const SortMode = {
     NAME: "Name",
     DATE_RELEASED: "Release date",
-    DATE_ADDED: "Recent",
+    LAST_LISTEN: "Recent",
     RATING: "Rating",
     STATUS: "Status",
     PRICE: "Price"
+}
+
+
+function longPollController(task) {
+    var polling = true;
+    const longPoll = async () => {
+
+        await task();
+        if (polling) {
+            setTimeout(async () => {
+                try {
+                    await longPoll();
+                } catch (error) { }
+            }, 100);
+        }
+
+    };
+
+    const cancel = () => {
+        polling = false;
+    };
+
+    setTimeout(async () => {
+        await longPoll();
+    }, 100);
+
+    return cancel;
+}
+
+function pollingController(task) {
+    
+    var interval = setInterval(async () => {
+        await task();
+    }, 3000);
+
+    const cancel = () => {
+        clearInterval(interval);
+    };
+
+    return cancel;
 }
 
 
@@ -98,7 +138,7 @@ class LibPlayer extends React.Component {
             const json = await res.json();
         };
 
-        
+
         this.audio.addEventListener('durationchange', async () => {
             this.setState({ duration: this.audio.duration });
 
@@ -268,7 +308,7 @@ class LibMenu extends React.Component {
 
         this.myList = React.createRef();
         this.player = React.createRef();
-
+        this.apiState = -1;
         window.resetApp = this.reset.bind(this);
     }
 
@@ -283,23 +323,27 @@ class LibMenu extends React.Component {
     }
 
     async loadLibrary() {
+        if (this.props.app.state.user === null) {
+            return;
+        }
         const data = {
             session_id: this.props.app.state.user.session_id
         };
-        const res = await this.props.app.apiRequest('/library', 'POST', data);
+        const res = await this.props.app.apiRequest('/library/', 'POST', data);
         const json = await res.json();
+        this.apiState = json.state;
         this.setState({ library: json.items });
     }
 
     async loadStore() {
-        const resS = await this.props.app.apiRequest('/store', 'GET');
+        const resS = await this.props.app.apiRequest('/store/', 'GET');
         const jsonS = await resS.json();
 
         // check if logged in
         try {
             if (this.props.app.state.user !== null) {
 
-                const resL = await this.props.app.apiRequest('/library', 'POST', { session_id: this.props.app.state.user.session_id });
+                const resL = await this.props.app.apiRequest('/library/', 'POST', { session_id: this.props.app.state.user.session_id });
                 const jsonL = await resL.json();
                 this.setState({ userLibrary: jsonL.items });
             }
@@ -308,23 +352,60 @@ class LibMenu extends React.Component {
         }
 
         this.setState({ library: jsonS.items });
+        this.apiState = jsonS.state;
     }
+
+    async componentWillUnmount() {
+        // cancel long polling
+        if (this.longPollCancel !== undefined) {
+            this.longPollCancel();
+        }
+    }
+
 
     async componentDidMount() {
 
         // load store if this is the store menu
         if (this.isStore()) {
             await (this.loadStore());
-            return;
-        }
-
-        // load library if logged in
-        if (this.props.app.state.user !== null) {
-            await (this.loadLibrary());
+        } else {
+            // load library if logged in
+            if (this.props.app.state.user !== null) {
+                await (this.loadLibrary());
+            }
         }
 
         // use long polling to update library
-        //TODO: add long polling
+        // create long polling task
+        //console.log('long polling');
+        const isStoreB = this.isStore();
+
+        const longPoll = async () => {
+
+
+            if (isStoreB) {
+                var res = await this.props.app.apiRequest('/store_state/', 'POST', { state: this.apiState });
+                //console.log("long poll result arrived");
+                var json = await res.json();
+                if (json.state !== this.apiState) {
+                    await this.loadStore();
+                }
+            } else {
+                var res = await this.props.app.apiRequest('/user_state/', 'POST', { session_id: this.props.app.state.user.session_id, state: this.apiState });
+                var json = await res.json();
+                if (json.state !== this.apiState) {
+                    await this.loadLibrary();
+                }
+            }
+
+
+        };
+
+        // start long polling task
+        this.longPollCancel = pollingController(longPoll);
+        //console.log("After long poll");
+
+
     }
 
 
@@ -630,7 +711,7 @@ class LibMenu extends React.Component {
                             }}>
                                 <option className='al-button'>{SortMode.NAME}</option>
                                 <option className='al-button'>{SortMode.DATE_RELEASED}</option>
-                                <option className='al-button'>{SortMode.DATE_ADDED}</option>
+                                {this.isStore() ? null : <option className='al-button'>{SortMode.LAST_LISTEN}</option>}
                                 <option className='al-button'>{SortMode.RATING}</option>
                                 {this.isStore() ? <option className='al-button'>{SortMode.PRICE}</option> : <option className='al-button'>{SortMode.STATUS}</option>}
                             </select>

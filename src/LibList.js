@@ -11,7 +11,7 @@ const ListenStatus = {
 const SortMode = {
   NAME: "Name",
   DATE_RELEASED: "Release date",
-  DATE_ADDED: "Recent",
+  LAST_LISTEN: "Recent",
   RATING: "Rating",
   STATUS: "Status",
   PRICE: "Price"
@@ -121,41 +121,38 @@ class StorePanel extends React.Component {
       loggedIn: false
     };
 
-    this.entry = null;
-    if ("entry" in props) {
-      this.entry = props.entry;
-    }
 
-    this.user = null;
-    this.userLibrary = null;
-    if ("libMenu" in props) {
-      this.userLibrary = props.libMenu.state.userLibrary;
-      this.user = props.libMenu.props.app.state.user;
-      if (this.user !== null) {
-        this.state.loggedIn = true;
-      }
-
-    }
+    
 
     this.state.owned = this.checkOwned();
 
   }
 
   checkOwned() {
+    var user = null;
+    var userLibrary = null;
+    var loggedIn = false;
+    if ("libMenu" in this.props) {
+      userLibrary = this.props.libMenu.state.userLibrary;
+      user = this.props.libMenu.props.app.state.user;
+      if (user !== null) {
+        loggedIn = true;
+      }
+    }
     // check if user owns this entry
-    if (this.user === null) {
+    if (user === null) {
       return false;
     }
-    if (this.userLibrary === null) {
-      return false;
-    }
-
-    if (this.entry === null) {
+    if (userLibrary === null) {
       return false;
     }
 
-    let id = this.entry.content_id;
-    for (let entry of this.userLibrary) {
+    if (this.props.entry === null) {
+      return false;
+    }
+
+    let id = this.props.entry.content_id;
+    for (let entry of userLibrary) {
       if (entry.content_id === id) {
         return true;
       }
@@ -178,7 +175,7 @@ class StorePanel extends React.Component {
     // buy entry
     const app = this.props.libMenu.props.app;
     let req = await app.apiRequest("/buy", "POST", {
-      item_id: this.entry.content_id,
+      item_id: this.props.entry.content_id,
       session_id: app.state.user.session_id
     });
     let res = await req.json();
@@ -186,26 +183,26 @@ class StorePanel extends React.Component {
     if (res.status !== true) {
       return;
     }
-    const dialog = document.querySelector(".buyDialog" + this.entry.content_id);
+    const dialog = document.querySelector(".buyDialog" + this.props.entry.content_id);
     dialog.close();
-    this.props.libMenu.props.store.setState({ balance: this.props.libMenu.props.store.state.balance - this.entry.price });
+    this.props.libMenu.props.store.setState({ balance: this.props.libMenu.props.store.state.balance - this.props.entry.price });
     this.setState({ owned: true });
   }
 
   closeBuyDialog(e) {
     e.stopPropagation();
     // close buy dialog
-    const dialog = document.querySelector(".buyDialog" + this.entry.content_id);
+    const dialog = document.querySelector(".buyDialog" + this.props.entry.content_id);
     dialog.close();
   }
 
   async clickEdit(e) {
     e.stopPropagation();
-    if(this.entry === null) {
+    if(this.props.entry === null) {
       return;
     }
 
-    this.props.libMenu.props.store.editItem(this.entry);
+    this.props.libMenu.props.store.editItem(this.props.entry);
   }
 
 
@@ -215,6 +212,19 @@ class StorePanel extends React.Component {
     const rating = this.props.entry.rating;
     const price = getPriceString(this.props.entry.price);
 
+    
+    var user = null;
+    var userLibrary = null;
+    var loggedIn = false;
+    if ("libMenu" in this.props) {
+      userLibrary = this.props.libMenu.state.userLibrary;
+      user = this.props.libMenu.props.app.state.user;
+      if (user !== null) {
+        loggedIn = true;
+      }
+    }
+    
+
     let buttonClass = "rightPanelBuyButton";
     if (this.state.owned) {
       buttonClass += " owned";
@@ -222,9 +232,9 @@ class StorePanel extends React.Component {
     const buttonText = this.state.owned ? "Owned" : "Buy for " + price;
     return (
       <div className="rightPanel">
-        <dialog className={"buyDialog" + " buyDialog" + this.entry.content_id} onClick={(e) => { e.stopPropagation(); }} open={this.state.buyDialogOpen}>
+        <dialog className={"buyDialog" + " buyDialog" + this.props.entry.content_id} onClick={(e) => { e.stopPropagation(); }} open={this.state.buyDialogOpen}>
           <div className="buyDialogInner">
-            {(this.state.loggedIn) ?
+            {(loggedIn) ?
               (<div>
                 <div className="buyDialogHeader">Buy {this.props.entry.title} for {price}?</div>
                 <div className="buyDialogButtons">
@@ -254,7 +264,7 @@ class StorePanel extends React.Component {
         </div>
         <div className="rightPanelBottom">
           <div className="rightPanelBuy">
-            {this.user !== null && this.user.admin ?
+            {user !== null && user.admin ?
             <button onClick={(e) => this.clickEdit(e)} className={buttonClass+" editButtonMarginR"}>Edit</button>
             : null}
             <button onClick={(e) => this.clickBuy(e)} className={buttonClass}>{buttonText}</button>
@@ -447,7 +457,7 @@ class LibEntry extends React.Component {
           <div className="libEntryDescription libEntryDetails">{entry.description}</div>
         </div>
         <div className="libEntryRight">
-          {this.props.isStore ? <StorePanel app={this.props.libMenu.props.app} entry={entry} libMenu={this.props.libMenu} /> : <LibraryPanel app={this.props.libMenu.props.app} entry={entry} libMenu={this.props.libMenu} />}
+          {this.props.isStore ? <StorePanel app={this.props.libMenu.props.app} entry={this.props.entry} libMenu={this.props.libMenu} /> : <LibraryPanel app={this.props.libMenu.props.app} entry={this.props.entry} libMenu={this.props.libMenu} />}
           {/*
           <div className="libEntryStatus libEntryDetails">{status}</div>
           <div className="libEntryRating libEntryDetails">{this.getRating()}</div>
@@ -749,10 +759,11 @@ class LibList extends React.Component {
       c = -1;
     }
 
+
     const entrySortModes = {
       [SortMode.NAME]: (a, b) => { return b.title.localeCompare(a.title) * c; },
-      [SortMode.DATE_ADDED]: (a, b) => { return (a.addedDate - b.addedDate) * c; },
-      [SortMode.STATUS]: (a, b) => { return (a.progress - b.progress) * c; },
+      [SortMode.LAST_LISTEN]: (a, b) => { return (a.last_played - b.last_played) * c; },
+      [SortMode.STATUS]: (a, b) => { return (a.progress / a.duration - b.progress / b.duration) * c; },
       [SortMode.RATING]: (a, b) => { return (a.rating - b.rating) * c; },
       [SortMode.DATE_RELEASED]: (a, b) => { return (a.releaseDate - b.releaseDate) * c; },
       [SortMode.PRICE]: (a, b) => { return (a.price - b.price) * c; },
@@ -814,7 +825,7 @@ class LibList extends React.Component {
 
     const seriesSortModes = {
       [SortMode.NAME]: (a, b) => { return b.localeCompare(a) * c; },
-      [SortMode.DATE_ADDED]: (a, b) => { return (series[a][0].addedDate - series[b][0].addedDate) * c; },
+      [SortMode.LAST_LISTEN]: (a, b) => { return (series[a][0].last_played - series[b][0].last_played) * c; },
       [SortMode.STATUS]: (a, b) => { return (series[a][0].progress - series[b][0].progress) * c; },
       [SortMode.RATING]: (a, b) => { return (series[a][0].rating - series[b][0].rating) * c; },
       [SortMode.DATE_RELEASED]: (a, b) => { return (series[a][0].releaseDate - series[b][0].releaseDate) * c; },

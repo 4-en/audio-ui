@@ -29,7 +29,7 @@ class Navbar extends React.Component {
                 <div className="nav-spacer"></div> {/* spacer div to push content below navbar */}
                 <div className="navbar">
                     <Link className='navbar-item' to="/">Home</Link>
-                    <Link className='navbar-item' to="/library">Library</Link>
+                    {this.props.user === null ? null : <Link className='navbar-item' to="/library">Library</Link>}
                     <Link className='navbar-item' to="/store">Store</Link>
                     {this.props.user === null ? 
                     <Link className='navbar-item' to="/login">Login</Link> :

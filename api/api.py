@@ -257,12 +257,13 @@ class AudioAPI:
             # use long polling to wait for state change
             # get store state
             state = self.audioManager.get_store_state()
-            max_tries = 60
-            while state == state_request.state and max_tries > 0:
-                # poll every second
-                await asyncio.sleep(1.0)
-                state = self.audioManager.get_store_state()
-                max_tries -= 1
+            # currently just regular polling
+            #max_tries = 60
+            #while state == state_request.state and max_tries > 0:
+            #    # poll every second
+            #    await asyncio.sleep(1.0)
+            #   state = self.audioManager.get_store_state()
+            #    max_tries -= 1
             return StateResponse(state=state)
             
         
@@ -275,11 +276,12 @@ class AudioAPI:
                 raise HTTPException(status_code=401, detail="Invalid session id")
             max_tries = 60
             state = self.audioManager.get_user_state(user["user_id"])
-            while state == state_request.state and max_tries > 0:
-                # poll every second
-                await asyncio.sleep(1.0)
-                state = self.audioManager.get_user_state(user["user_id"])
-                max_tries -= 1
+            # currently just regular polling
+            #while state == state_request.state and max_tries > 0:
+            #    # poll every second
+            #    await asyncio.sleep(1.0)
+            #    state = self.audioManager.get_user_state(user["user_id"])
+            #    max_tries -= 1
             return StateResponse(state=state)
 
 

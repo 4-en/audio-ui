@@ -251,14 +251,12 @@ class EditItemView extends React.Component {
         series_index: int
         */
         let categories = "";
-        console.log(this.state.item.categories);
         for (let i = 0; i < this.state.item.categories.length; i++) {
             categories += this.state.item.categories[i];
             if (i < this.state.item.categories.length - 1) {
                 categories += ", ";
             }
         }
-        console.log(categories);
 
         let author = this.state.item.author.first_name + " " + this.state.item.author.last_name;
         let durationH = Math.floor(this.state.item.duration / 3600);
@@ -300,7 +298,7 @@ class EditItemView extends React.Component {
         }
 
         // api call
-        const res = await this.props.app.apiRequest("/create_item", "POST",{
+        const res = await this.props.app.apiRequest("/create_item/", "POST",{
             session_id: this.props.app.state.user.session_id,
             item_audio_type: item.audio_type,
             item_title: item.title,
@@ -345,7 +343,7 @@ class EditItemView extends React.Component {
         const id = this.state.item.content_id;
 
         // api call
-        const res = await this.props.app.apiRequest("/edit_item", "POST",{
+        const res = await this.props.app.apiRequest("/edit_item/", "POST",{
             session_id: this.props.app.state.user.session_id,
             item_id: id,
             changes: {
@@ -378,7 +376,7 @@ class EditItemView extends React.Component {
         console.log(id);
 
         // delete item with id
-        const res = await this.props.app.apiRequest("/delete_item", "POST",{
+        const res = await this.props.app.apiRequest("/delete_item/", "POST",{
             session_id: this.props.app.state.user.session_id,
             item_id: id
         });

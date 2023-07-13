@@ -17,7 +17,44 @@ import Charge from './Charge';
 //import {Login} from "./Register";
 
 
+function longPollController(task) {
+  var polling = true;
+  const longPoll = async () => {
 
+    await task();
+    if (polling) {
+      setTimeout(async () => {
+        try {
+          await longPoll();
+        } catch (error) { }
+      }, 100);
+    }
+
+  };
+
+  const cancel = () => {
+    polling = false;
+  };
+
+  setTimeout(async () => {
+    await longPoll();
+  }, 100);
+
+  return cancel;
+}
+
+function pollingController(task) {
+    
+  var interval = setInterval(async () => {
+      await task();
+  }, 3000);
+
+  const cancel = () => {
+      clearInterval(interval);
+  };
+
+  return cancel;
+}
 
 
 class App extends React.Component {
@@ -53,6 +90,12 @@ class App extends React.Component {
     })
   }
 
+  async componentWillUnmount() {
+    if (this.lpCancel) {
+      this.lpCancel();
+    }
+  }
+
   async componentDidMount() {
 
     // try to login with session id from local storage
@@ -67,11 +110,39 @@ class App extends React.Component {
       }
     }
 
+    // long polling for user updates
+    if (this.state.user !== null) {
+      this.userState = -1;
+      const longPoll = async () => {
+        const response = await this.apiRequest("/user_state/", "POST",
+          {
+            session_id: this.state.user.session_id,
+            state: this.userState
+          });
+        const data = await response.json();
+        if (response.status === 200) {
+          if (this.userState === -1) {
+            this.userState = data.state;
+            return;
+          }
+          if (data.state !== this.userState) {
+            this.userState = data.state;
+
+            await this.updateUser();
+          }
+        }
+      }
+
+      this.lpCancel = pollingController(longPoll);
+
+    }
+
+
 
     // check if API is available
 
     return;
-
+    /*
     let tries = 0;
     const maxTries = 3;
     while (tries < maxTries) {
@@ -98,7 +169,7 @@ class App extends React.Component {
       // api is not available
       this.setState({ apiAvailable: false });
       return;
-    }
+    }*/
 
   }
 
@@ -136,7 +207,7 @@ class App extends React.Component {
 
 
   async register(username, password, email) {
-    const response = await this.apiRequest("/register", "POST", { username: username, password: password, email: email });
+    const response = await this.apiRequest("/register/", "POST", { username: username, password: password, email: email });
     const data = await response.json();
     console.log(data);
     if (response.status === 200) {
@@ -149,8 +220,16 @@ class App extends React.Component {
     }
   }
 
+  async updateUser() {
+    const response = await this.apiRequest("/user/", "POST", { session_id: this.state.user.session_id });
+    const data = await response.json();
+
+    this.setState({ user: data.user });
+  }
+
+
   async login(username, password) {
-    const response = await this.apiRequest("/login", "POST", { username: username, password: password });
+    const response = await this.apiRequest("/login/", "POST", { username: username, password: password });
     const data = await response.json();
     console.log(data);
     if (response.status === 200) {
