@@ -240,6 +240,12 @@ class AbstractAudioManager:
             return None
         return self._join_user_and_state(user.to_dict())
     
+    def _get_user_items_by_item_id(self, item_id: int) -> list:
+        """
+        Get user items by item id
+        """
+        raise NotImplementedError
+    
     def _join_user_and_state(self, user: dict) -> dict:
         """
         Join user and state
@@ -293,6 +299,7 @@ class AbstractAudioManager:
         if user is None:
             return None
         return self._join_user_and_state(user.to_dict())
+
     
     def _get_user_library_by_id(self, user_id: int) -> list:
         """
@@ -429,6 +436,35 @@ class AbstractAudioManager:
                 return item
         return None
     
+    def _update_item_rating(self, item_id: int) -> bool:
+        """
+        Updates global rating of item based on all user ratings
+        
+        """
+        item = self._get_store_item_by_id(item_id)
+        if item is None:
+            return False
+        user_items = self._get_user_items_by_item_id(item_id)
+        if user_items is None or len(user_items) == 0:
+            return False
+        
+        count = 0
+        ratings = 0
+        for user_item in user_items:
+            if user_item.rating is not None:
+                ratings += user_item.rating
+                count += 1
+
+        if count == 0:
+            return False
+        
+        item.rating = ratings / count
+        self._edit_store_item(item)
+        self.notify_store_change()
+        return True
+
+        
+    
     def rate_item(self, session_id: str, item_id: int, rating: int) -> bool:
         """
         Rate item
@@ -444,7 +480,9 @@ class AbstractAudioManager:
         self._edit_user_item(user_content)
         self.notify_user_change(user.user_id)
 
-        # TODO: recalculate store item rating and notify store change
+        # update global rating
+        self._update_item_rating(user_content.content_id)
+        
         return True
     
     def update_progress(self, session_id: str, item_id: int, progress: int) -> bool:
@@ -496,6 +534,7 @@ class AbstractAudioManager:
         """
         Returns recommendations for specific user or general recommendations
         
+        If session_id is None, returns general recommendations
         """
         my_library = []
         store_library = self.get_store_library()

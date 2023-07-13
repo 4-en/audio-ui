@@ -172,6 +172,16 @@ class MySQLManager(AbstractAudioManager):
         if result is None:
             return None
         return self._result_to_user(result)
+    
+    def _get_user_items_by_item_id(self, item_id: int) -> list:
+        """
+        Get user items by item id
+        """
+        user_items = []
+        self.cursor.execute("SELECT * FROM UserContent WHERE content_id = %s", (item_id,))
+        for result in self.cursor:
+            user_items.append(self._result_to_user_item(result))
+        return user_items
 
     def _create_user_item(self, user_content:UserContent) -> UserContent:
         """
