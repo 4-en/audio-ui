@@ -482,7 +482,7 @@ class AbstractAudioManager:
 
         # update global rating
         self._update_item_rating(user_content.content_id)
-        
+
         return True
     
     def update_progress(self, session_id: str, item_id: int, progress: int) -> bool:
@@ -515,7 +515,9 @@ class AbstractAudioManager:
         # normally we would get the url from the server
         user_content.last_played = int(time.time())
         self._edit_user_item(user_content)
-        self.notify_user_change(user.user_id)
+
+        # dont notify since the ui shouldnt update when playing an item
+        # self.notify_user_change(user.user_id)
         return "https://dorar.at/LARGE/PuretuneMp3/73lbS7hNl1pwN3Tch56zYg/1685383200/201405/171.mp3"
     
     def charge_user(self, session_id: str, amount: int) -> bool:
