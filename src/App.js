@@ -26,7 +26,9 @@ function longPollController(task) {
       setTimeout(async () => {
         try {
           await longPoll();
-        } catch (error) { }
+        } catch (error) {
+          polling = false;
+        }
       }, 100);
     }
 
@@ -44,13 +46,18 @@ function longPollController(task) {
 }
 
 function pollingController(task) {
-    
+
+  var cancel = () => { };
   var interval = setInterval(async () => {
+    try {
       await task();
+    } catch (error) {
+      cancel();
+    }
   }, 3000);
 
-  const cancel = () => {
-      clearInterval(interval);
+  cancel = () => {
+    clearInterval(interval);
   };
 
   return cancel;

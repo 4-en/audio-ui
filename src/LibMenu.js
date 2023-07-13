@@ -49,16 +49,22 @@ function longPollController(task) {
 
 function pollingController(task) {
 
+    var cancel = () => { };
     var interval = setInterval(async () => {
+      try {
         await task();
+      } catch (error) {
+        console.log("ERROR");
+        cancel();
+      }
     }, 3000);
-
-    const cancel = () => {
-        clearInterval(interval);
+  
+    cancel = () => {
+      clearInterval(interval);
     };
-
+  
     return cancel;
-}
+  }
 
 
 
@@ -385,7 +391,6 @@ class LibMenu extends React.Component {
 
 
         // load store if this is the store menu
-        console.log("first load");
         if (this.isStore()) {
             await (this.loadStore());
         } else {
