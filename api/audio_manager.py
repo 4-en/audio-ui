@@ -2,6 +2,7 @@
 import hashlib
 from audiotypes import User, AudioContent, Author, UserContent
 import time
+import random
 
 class AbstractAudioManager:
 
@@ -302,7 +303,7 @@ class AbstractAudioManager:
             return None
         user_content.sort(key=lambda x: x.content_id)
         store_content = self.get_store_library()
-        print(user_content)
+        
         if store_content is None:
             return None
         user_library = []
@@ -491,6 +492,82 @@ class AbstractAudioManager:
         self.notify_user_change(user.user_id)
         return True
     
+    def get_recommendations(self, session_id: str|None, count: int) -> list:
+        """
+        Returns recommendations for specific user or general recommendations
+        
+        """
+        my_library = []
+        store_library = self.get_store_library()
+        if session_id is not None:
+            user = self._get_user_by_session_id(session_id)
+            if user is None or user.check_session(session_id) is False:
+                my_library = []
+            else:
+                _, my_library = self.get_user_library_by_session_id(session_id)
+                if my_library is None:
+                    my_library = []
+        
+        # get users genres
+        my_genres = {}
+        for item in my_library:
+            for genre in item["categories"]:
+                if genre not in my_genres:
+                    my_genres[genre] = 0
+                my_genres[genre] += 1
+        
+        # if user has no genres, get every genre in store with weight 1
+        # if user has genres, get every missing genre with weight 0.2
+        def_weight = 1
+        if len(my_genres) > 0:
+            def_weight = 0.2
+        for item in store_library:
+            for genre in item["categories"]:
+                if genre not in my_genres:
+                    my_genres[genre] = def_weight
+        
+        
+        # remove items from store that are already in my library
+        for item in my_library:
+            for store_item in store_library:
+                if item["content_id"] == store_item["content_id"]:
+                    store_library.remove(store_item)
+                    break
+
+        # sort store items rating
+        store_library.sort(key=lambda x: x["rating"], reverse=True)
+
+        recommendations = []
+        while len(recommendations) < count and len(store_library) > 0:
+            # pick a genre based on weights
+            genre = None
+            total = 0
+            pick = 0
+            for key in my_genres:
+                total += my_genres[key]
+            if total == 0:
+                break
+            pick = random.random() * total
+            for key in my_genres:
+                pick -= my_genres[key]
+                if pick <= 0:
+                    genre = key
+                    break
+
+            # pick the first item in store that has the genre
+            found = False
+            for item in store_library:
+                if genre in item["categories"]:
+                    recommendations.append(item)
+                    store_library.remove(item)
+                    found = True
+                    my_genres[genre] *= 0.7
+                    break
+            if found is False:
+                my_genres[genre] = 0
+
+        return recommendations
+
     
 
     ### admin functions

@@ -100,6 +100,10 @@ class ChargeRequest(BaseModel):
     session_id: str
     amount: int
 
+class RecommendRequest(BaseModel):
+    session_id: str | None = None
+    amount: int = 10
+
 
 class AudioAPI:
     def __init__(self, audioManager:AbstractAudioManager, host:str="localhost", port:int=3456) -> None:
@@ -147,7 +151,7 @@ class AudioAPI:
         # test route
         @self.app.get("/test/")
         async def test():
-            mydb.ping(reconnect=True, attempts=3, delay=5)
+            self.mydb.ping(reconnect=True, attempts=3, delay=5)
             return StatusResponse(status=True, message="Audio API is running")
 
         # login with username and password
@@ -312,6 +316,17 @@ class AudioAPI:
             if charge is None:
                 raise HTTPException(status_code=401, detail="Invalid session id")
             return StatusResponse(status=charge, message="User charged")
+        
+        @self.app.post("/recommend/")
+        async def recommend(recommend_request: RecommendRequest) -> ItemListResponse:
+            items = self.audioManager.get_recommendations(recommend_request.session_id, recommend_request.amount)
+            if items is None:
+                # no recommendations found
+                return ItemListResponse(items=[])
+            return ItemListResponse(items=items)
+        
+            
+
 
 
 
