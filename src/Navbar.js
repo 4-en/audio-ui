@@ -23,12 +23,6 @@ class Navbar extends React.Component {
     }
 
     render() {
-        let loginLabel = "exception";
-        try {
-            loginLabel = this.props.user !== null ? this.props.user.username : 'Test Login';
-        } catch (e) {
-            console.log(e);
-        }
 
         return (
             <div>
@@ -40,8 +34,10 @@ class Navbar extends React.Component {
                     {this.props.user === null ? 
                     <Link className='navbar-item' to="/login">Login</Link> :
                     <button className='navbar-item' onClick={() => { this.logout(); }}>Logout</button>}
+                    {this.props.user === null ?
+                    <Link className='navbar-item' to="/register">Register</Link> :
+                    null}
                     <button className='navbar-item' onClick={() => { userModeToggle(); }}>Theme</button>
-                    <button className='navbar-item' onClick={() => { this.testLogin(); }}>{loginLabel}</button>
                 </div>
             </div>
         );
