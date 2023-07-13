@@ -92,7 +92,7 @@ class ContentRating extends React.Component {
   }
 
   render() {
-    let rating = this.state.rating;
+    let rating = Math.round(this.state.rating);
     const stars = [];
     for (let i = 0; i < 5; i++) {
       if (rating > 0) {
@@ -166,7 +166,7 @@ class StorePanel extends React.Component {
       return;
     }
     // open buy dialog
-    const dialog = document.querySelector(".buyDialog" + this.entry.content_id);
+    const dialog = document.querySelector(".buyDialog" + this.props.entry.content_id);
     dialog.showModal();
   }
 
@@ -581,7 +581,7 @@ class LibSeriesEntry extends React.Component {
   }
 
   getRating() {
-    let rating = this.getAvgRating();
+    let rating = Math.round(this.getAvgRating());
     return formatRating(rating);
   }
 

@@ -48,7 +48,7 @@ function longPollController(task) {
 }
 
 function pollingController(task) {
-    
+
     var interval = setInterval(async () => {
         await task();
     }, 3000);
@@ -176,11 +176,13 @@ class LibPlayer extends React.Component {
 
 
 
-    async setEntry(entry) {
+    async setEntry(entry, play = true) {
         this.audio = null;
         await this.loadAudio(entry);
-        this.setState({ entry: entry });
-        await this.play();
+        this.setState({ entry: entry, hidden: false });
+        if (play) {
+            await this.play();
+        }
     }
 
     async play() {
@@ -303,17 +305,23 @@ class LibMenu extends React.Component {
             maxSubcategories: 5,
             search: '',
             library: [],
-            userLibrary: []
+            userLibrary: [],
+            playNext: null
         };
 
         this.myList = React.createRef();
         this.player = React.createRef();
         this.apiState = -1;
         window.resetApp = this.reset.bind(this);
+
     }
 
     async play(entry) {
         await this.player.current.setEntry(entry);
+    }
+
+    async playNoAuto(entry) {
+        await this.player.current.setEntry(entry, false);
     }
 
     isStore() {
@@ -365,15 +373,36 @@ class LibMenu extends React.Component {
 
     async componentDidMount() {
 
+        // check for url parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        var search = urlParams.get('search');
+        if (search !== null) {
+            // replace '+' with ' '
+            search = search.replaceAll('+', ' ');
+            this.setState({ search: search });
+        }
+
+
+
         // load store if this is the store menu
+        console.log("first load");
         if (this.isStore()) {
             await (this.loadStore());
         } else {
             // load library if logged in
             if (this.props.app.state.user !== null) {
                 await (this.loadLibrary());
+
+                const playNext = urlParams.get('play');
+                if (playNext !== null) {
+                    // convert to int
+                    const playNextInt = parseInt(playNext);
+                    this.setState({ playNext: playNextInt });
+                }
+
             }
         }
+
 
         // use long polling to update library
         // create long polling task
@@ -685,6 +714,28 @@ class LibMenu extends React.Component {
                 //this.props.callback({ type: 'CLICK', name: "categoryButton", value: cat });
             }}> {catName} </button>);
         }
+
+        // set timeout for playnext
+        if (this.state.playNext !== null) {
+            console.log("play next");
+            // find entry
+            var playNextEntry = null;
+            for (let i = 0; i < library.length; i++) {
+                if (library[i].content_id === this.state.playNext) {
+                    playNextEntry = library[i];
+                    break;
+                }
+            }
+            if (playNextEntry !== null) {
+                setTimeout(async () => {
+                    try {
+                        await this.playNoAuto(playNextEntry);
+                    } catch (e) {
+                    }
+                }, 2000);
+            }
+        }
+
 
 
 
