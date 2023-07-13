@@ -66,6 +66,11 @@ class EditItemRequest(BaseModel):
     item_id: int
     changes: dict
 
+class RateItemRequest(BaseModel):
+    session_id: str
+    item_id: int
+    rating: float
+
 
 class PlayResponse(BaseModel):
     item: dict
@@ -185,6 +190,18 @@ class AudioAPI:
             if user is None:
                 raise HTTPException(status_code=401, detail="Invalid session id")
             return UserResponse(user=user)
+        
+        # rate item with session id and item id and rating
+        @self.app.post("/rate/")
+        async def rate(rate_request: RateItemRequest) -> StatusResponse:
+            res = self.audioManager.rate_item(rate_request.session_id, rate_request.item_id, rate_request.rating)
+
+            if res is None:
+                raise HTTPException(status_code=401, detail="Invalid session id")
+            if res is False:
+                raise HTTPException(status_code=400, detail="Item not found")
+            return StatusResponse(status=True, message="Item rated")
+
             
 
         # get user library with session id

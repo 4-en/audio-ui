@@ -460,7 +460,7 @@ class AbstractAudioManager:
         
         item.rating = ratings / count
         self._edit_store_item(item)
-        self.notify_store_change()
+        #self.notify_store_change()
         return True
 
         

@@ -68,7 +68,7 @@ class ContentRating extends React.Component {
     super(props);
     this.rating = 0;
     if ("rating" in props) {
-      this.rating = props.rating;
+      this.state={rating: props.rating};
     }
     this.symbol = "★";
     if ("symbol" in props) {
@@ -81,10 +81,18 @@ class ContentRating extends React.Component {
     if(this.props.allowRating === null)
       return;
     // set rating
+    this.setState({rating: rating});
+
+    var res = await this.props.app.apiRequest("/rate/", "POST", {
+      item_id: this.props.entry.content_id,
+      rating: rating,
+      session_id: this.props.app.state.user.session_id
+    });
+
   }
 
   render() {
-    let rating = this.rating;
+    let rating = this.state.rating;
     const stars = [];
     for (let i = 0; i < 5; i++) {
       if (rating > 0) {
@@ -94,10 +102,11 @@ class ContentRating extends React.Component {
       }
       rating--;
     }
+    const fixedVal = this.props.allowRating ? 0 : 1;
     // eg 4.5 ★★★★
     return (
       <div className="contentRating">
-        <span className="contentRatingNumber">{this.rating.toFixed(1)} </span>
+        {!this.props.allowRating ? <span className="contentRatingNumber">{this.state.rating.toFixed(fixedVal)} </span> : null}
         <span className="contentRatingStars">{stars}</span>
       </div>
     );
@@ -238,7 +247,7 @@ class StorePanel extends React.Component {
           - Buy button (with price) or grayed out if already owned with "Owned" text
           */}
           <div className="rightPanelRating">
-            <ContentRating rating={rating} />
+            <ContentRating entry={this.props.entry} app={this.props.app} rating={rating} />
           </div>
           <div className="rightPanelDuration">{duration}</div>
 
@@ -287,7 +296,7 @@ class LibraryPanel extends React.Component {
   }
 
   render() {
-    const rating = this.props.entry.rating;
+    const rating = this.props.entry.user_rating;
     const progress = this.props.entry.progress;
     let status = ListenStatus.NOT_STARTED;
     if (progress > 0.05) {
@@ -310,7 +319,7 @@ class LibraryPanel extends React.Component {
           - Progress bar
           */}
           <div className="rightPanelRating">
-            <ContentRating rating={rating} allowRating={true} />
+            <ContentRating entry={this.props.entry} app={this.props.app} rating={rating} allowRating={true} />
           </div>
           <div className="rightPanelStatus">{status}</div>
           <ProgressBar progress={progress * 100} />
@@ -440,7 +449,7 @@ class LibEntry extends React.Component {
           <div className="libEntryDescription libEntryDetails">{entry.description}</div>
         </div>
         <div className="libEntryRight">
-          {this.props.isStore ? <StorePanel entry={entry} libMenu={this.props.libMenu} /> : <LibraryPanel entry={entry} libMenu={this.props.libMenu} />}
+          {this.props.isStore ? <StorePanel app={this.props.libMenu.props.app} entry={entry} libMenu={this.props.libMenu} /> : <LibraryPanel app={this.props.libMenu.props.app} entry={entry} libMenu={this.props.libMenu} />}
           {/*
           <div className="libEntryStatus libEntryDetails">{status}</div>
           <div className="libEntryRating libEntryDetails">{this.getRating()}</div>
