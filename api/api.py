@@ -44,6 +44,11 @@ class PlayRequest(BaseModel):
     session_id: str
     item_id: int
 
+class ProgressRequest(BaseModel):
+    session_id: str
+    item_id: int
+    progress: int
+
 class CreateItemRequest(BaseModel):
     session_id: str
     item_audio_type: int
@@ -341,6 +346,20 @@ class AudioAPI:
                 # no recommendations found
                 return ItemListResponse(items=[])
             return ItemListResponse(items=items)
+        
+        @self.app.post("/set_progress/")
+        async def set_progress(progress_request: ProgressRequest) -> StatusResponse:
+            res = self.audioManager.set_user_item_progress(
+                progress_request.session_id,
+                progress_request.item_id,
+                progress_request.progress
+            )
+            if res is None:
+                raise HTTPException(status_code=401, detail="Invalid session id")
+            if res is False:
+                raise HTTPException(status_code=400, detail="Item not found")
+            return StatusResponse(status=True, message="Progress updated")
+
         
             
 

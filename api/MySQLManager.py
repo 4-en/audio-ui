@@ -229,7 +229,6 @@ class MySQLManager(AbstractAudioManager):
         Edit user item
         """
         
-        
         self.cursor.execute("UPDATE UserContent SET user_id = %s, content_id = %s, rating = %s, progress = %s, purchase_date = %s, last_played = %s WHERE user_content_id = %s",
                             (user_content.user_id, user_content.content_id, user_content.rating, user_content.progress, user_content.purchased, user_content.last_played, user_content.user_content_id))
         

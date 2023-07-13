@@ -518,7 +518,7 @@ class AbstractAudioManager:
 
         # dont notify since the ui shouldnt update when playing an item
         # self.notify_user_change(user.user_id)
-        return "https://dorar.at/LARGE/PuretuneMp3/73lbS7hNl1pwN3Tch56zYg/1685383200/201405/171.mp3"
+        return "/static/audio/demo.mp3"
     
     def charge_user(self, session_id: str, amount: int) -> bool:
         """
@@ -608,6 +608,23 @@ class AbstractAudioManager:
                 my_genres[genre] = 0
 
         return recommendations
+    
+    def set_user_item_progress(self, session_id: str, item_id: int, progress: int) -> bool:
+        """
+        Set user item progress
+        Returns true if successful
+        """
+        user = self._get_user_by_session_id(session_id)
+        if user is None or user.check_session(session_id) is False:
+            return False
+        user_content = self._get_user_item(user.user_id, item_id)
+        if user_content is None:
+            return False
+        user_content.progress = int(progress)
+        user_content.last_played = int(time.time())
+        
+        return self._edit_user_item(user_content)
+
 
     
 

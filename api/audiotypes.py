@@ -127,7 +127,8 @@ class UserContent:
             "content_id": self.content_id,
             "rating": self.rating,
             "progress": self.progress,
-            "purchased": self.purchased
+            "purchased": self.purchased,
+            "last_played": self.last_played
         }
     
 

@@ -30,7 +30,7 @@ class LibPlayer extends React.Component {
             entry: null,
             playing: false,
             time: 0,
-            duration: 0,
+            duration: 60 * 60,
             volume: 0.5,
             muted: false
         };
@@ -39,45 +39,122 @@ class LibPlayer extends React.Component {
     }
 
     async componentDidMount() {
-        
+
 
     }
 
-    async loadAudio(id) {
+    async loadAudio(entry) {
+        // get id
+        const id = entry.content_id;
         // get audio url
-        console.log(id);
-        var res = await this.props.app.apiRequest('/play/', 'POST', 
-        { 
-            session_id: this.props.app.state.user.session_id,
-            item_id: id }
+        var res = await this.props.app.apiRequest('/play/', 'POST',
+            {
+                session_id: this.props.app.state.user.session_id,
+                item_id: id
+            }
         );
         var json = await res.json();
         console.log(json);
 
+        const audioUrl = json.audio_url;
+
         // load audio file
         this.audio = document.getElementById('player_audio');
 
-    }
+        this.audio.src = audioUrl;
+        this.audio.load();
+
+
+        // set event listeners
+        var lastUpdate = 0;
+        this.audio.addEventListener('timeupdate', async () => {
+            this.setState({ time: this.audio.currentTime });
+
+            // update time every 20 seconds
+
+            if (Math.abs(this.audio.currentTime - lastUpdate) > UPDATE_TIME) {
+                await updateTime(this.audio.currentTime);
+                lastUpdate = this.audio.currentTime;
+            }
+        }
+        );
+
+        // update time in api every 20 seconds
+        const UPDATE_TIME = 20;
+        const updateTime = async (time) => {
+            const trueDuration = entry.duration;
+            const thisDuration = this.audio.duration;
+
+            var trueTime = time / thisDuration * trueDuration;
+            trueTime = Math.floor(trueTime);
+            console.log(trueTime);
+            const res = await this.props.app.apiRequest('/set_progress/', 'POST',
+                {
+                    session_id: this.props.app.state.user.session_id,
+                    item_id: id,
+                    progress: trueTime
+                }
+            );
+            const json = await res.json();
+        };
+
         
+        this.audio.addEventListener('durationchange', async () => {
+            this.setState({ duration: this.audio.duration });
+
+        }
+        );
+
+        this.audio.addEventListener('ended', async () => {
+            this.setState({ playing: false });
+
+            // update time
+            await updateTime(this.audio.currentTime);
+
+        }
+        );
+
+        this.audio.addEventListener('error', () => {
+            console.log('error');
+        }
+        );
+
+        // metadata loaded
+        this.audio.addEventListener('loadedmetadata', () => {
+            var startTime = entry.progress / entry.duration;
+            if (startTime > 0.95) {
+                startTime = 0.0;
+            } else {
+                startTime = startTime * this.audio.duration;
+            }
+            console.log(startTime);
+            this.audio.currentTime = startTime;
+        });
+
+    }
+
 
 
 
     async setEntry(entry) {
         this.audio = null;
-        await this.loadAudio(entry.content_id);
+        await this.loadAudio(entry);
         this.setState({ entry: entry });
         await this.play();
     }
 
     async play() {
-        if(this.audio === null) {
-            await this.loadAudio(this.state.entry.id);
+        if (this.audio === null) {
+            await this.loadAudio(this.state.entry);
+
         }
         this.setState({ playing: true, hidden: false });
+        this.audio.play();
     }
 
     async pause() {
         this.setState({ playing: false });
+        this.audio.pause();
     }
 
     async playClick() {
@@ -87,10 +164,6 @@ class LibPlayer extends React.Component {
 
             await this.play();
         }
-    }
-
-    setProgress(progress) {
-        console.log(progress);
     }
 
     progressClick(e) {
@@ -104,13 +177,31 @@ class LibPlayer extends React.Component {
         let clickXRelative = clickX - progressBar.getBoundingClientRect().left;
         // get progress percentage
         let progress = clickXRelative / progressBarWidth;
-        // set progress
-        this.setProgress(progress);
+
+        let newTime = progress * this.state.duration;
+        this.audio.currentTime = newTime;
+
     }
 
 
 
     render() {
+
+        const formatTime = (time) => {
+            let hours = Math.floor(time / 3600);
+            let hoursStr = hours < 10 ? '0' + hours : hours;
+            let minutes = Math.floor(time / 60);
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            let seconds = Math.floor(time % 60);
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            if (hours > 0) {
+                return hoursStr + ':' + minutes + ':' + seconds;
+            }
+
+            return minutes + ':' + seconds;
+        };
+
 
         if (this.state.hidden || this.state.entry === null) {
             return null;
@@ -126,9 +217,9 @@ class LibPlayer extends React.Component {
             </svg>
         )
 
-        const currentTime = "00:00"
-        const maxTime = "99:99";
-        const progress = "20";
+        const currentTime = formatTime(this.state.time);
+        const maxTime = formatTime(this.state.duration);
+        const progress = this.state.time / this.state.duration * 100;
 
 
         return (

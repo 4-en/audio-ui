@@ -269,17 +269,14 @@ class StorePanel extends React.Component {
 class ProgressBar extends React.Component {
   constructor(props) {
     super(props);
-    this.progress = 0;
-    if ("progress" in props) {
-      this.progress = props.progress;
-    }
-    this.progress = 30;
+    
+    
   }
 
   render() {
     return (
       <div className='progressOuter'>
-        <div className='progressInner' style={{ width: this.progress + '%' }}></div>
+        <div className='progressInner' style={{ width: this.props.progress + '%' }}></div>
       </div>
     );
   }
@@ -298,16 +295,17 @@ class LibraryPanel extends React.Component {
   render() {
     const rating = this.props.entry.user_rating;
     const progress = this.props.entry.progress;
+    const progPercent = progress / this.props.entry.duration;
     let status = ListenStatus.NOT_STARTED;
-    if (progress > 0.05) {
+    if (progPercent > 0.05) {
       status = ListenStatus.IN_PROGRESS;
-      if (progress > 0.95) {
+      if (progPercent > 0.95) {
         status = ListenStatus.COMPLETED;
       }
     }
 
 
-    const durationLeft = formatDuration(this.props.entry.duration * (1 - progress));
+    const durationLeft = formatDuration(this.props.entry.duration  - progress);
 
     return (
       <div className="rightPanel">
@@ -322,7 +320,7 @@ class LibraryPanel extends React.Component {
             <ContentRating entry={this.props.entry} app={this.props.app} rating={rating} allowRating={true} />
           </div>
           <div className="rightPanelStatus">{status}</div>
-          <ProgressBar progress={progress * 100} />
+          <ProgressBar progress={progPercent * 100} />
 
           <div className="rightPanelDuration">Remaining: {durationLeft}</div>
 
