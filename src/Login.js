@@ -1,7 +1,5 @@
 import React, {useState} from 'react';
 import { Form, Link } from 'react-router-dom';
-//import email from "./images/email.jpg";
-//import password from "./images/password.png";
 
 
 class Login extends React.Component {
@@ -10,31 +8,35 @@ class Login extends React.Component {
         super(props);
         
     }
-    
+    state = {
+        loginfb: ' ',
+    }
     async handleSubmit(e) {
-        //TODO: real login
         e.preventDefault();
         var first=e.target.uname.value;
         var second=e.target.pword.value;
-        //console.log("Username: "+first,"\n","Password: "+second)
-    
+        
+        
         let res = await this.props.app.login(first, second);
         if (res) {
             // successful login
         } else {
             // unsuccessful login
+            this.setState({loginfb: "unsuccessful login"});
         }
     
     } 
-        
+    removefb = e =>{
+        this.setState({loginfb: ""});
+    }   
     
     render() {
-        
+        const { loginfb } = this.state;
         return (
             <><div>
                 
-            </div><div className="loginmain">
-                    <div className='loginsub-main'>
+            </div><div>
+                    <div className='loginarea'>
                        
                         <div>
 
@@ -45,11 +47,11 @@ class Login extends React.Component {
                                 <form onSubmit={(e)=>{this.handleSubmit(e);}}>
                                 <div>
                                     
-                                    <input className="linput name"  type="text" name='uname' placeholder="Username" />
+                                    <input className="linput name" onChange={this.removefb} type="text" name='uname' placeholder="Username" />
                                 </div>
                                 <div className='second-input'>
                                
-                                    <input className="linput name" type="password" name='pword' placeholder="Password" />
+                                    <input className="linput name" onChange={this.removefb} type="password" name='pword' placeholder="Password" />
                                 </div>
                                 <div className='paddingbutton'>
                                     <div className='lbutton'>
@@ -69,6 +71,9 @@ class Login extends React.Component {
                                     <Link className='lb' to="/register">Register</Link>
                                     </div>
                                 </p>
+                                <div className='fbpadding2'>
+                                        <h5 className='fbtext2'>{loginfb}</h5>
+                                        </div>
 
 
                             </div>

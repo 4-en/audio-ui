@@ -1,11 +1,27 @@
 
-.loginsub-main{
+.loginarea{
     margin-left: auto;
     margin-right: auto;
     display: flex;
     justify-content: center;
     height: 550px;
-    width: 35%;
+    width: 40%;
+    box-shadow: 0px 0px 10px 10px var(--box-shadow-login);
+    padding-top: 30px;
+    border-radius: 60px;
+    background-color: var(--bg-color-login);
+    color: var(--text-color-login);
+    text-align: center;
+    font-size: 26px;
+    position: relative;
+}
+.registerarea{
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    justify-content: center;
+    height: 630px;
+    width: 40%;
     box-shadow: 0px 0px 10px 10px var(--box-shadow-login);
     padding-top: 30px;
     border-radius: 60px;
@@ -43,6 +59,7 @@
     outline: none;
     background-color: #fff;
     color: black;
+    
 }
 .email{
     height: 25px;
@@ -59,22 +76,25 @@
 }
 .second-input{
     padding-top: 20px;
+    padding-bottom: 20px;
 }
 .third-input{
     padding-top: 20px;
+    padding-bottom: 0px;
 }
 .lbutton{
     width: 300px;
     height: 50px;
     border-radius: 60px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.2s;
     background-color: var(--button-color-login);
     color: var(--text-color-login);
     font-size: 25px;
     border: none;
     text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-    transition: 0.2s;
+    
     
  
 }
@@ -97,7 +117,7 @@
     
 }
 .paddingbutton{
-    padding-top: 20px;
+    padding-top: 0px;
     
 }
 .reg{
@@ -111,4 +131,30 @@
 .or{
     padding-top: 4px;
     padding-bottom: 4px;
+}
+.fbtext{
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 10px;
+    text-align: center;
+    color: rgb(212, 61, 61);
+    font-weight: 700;
+    
+}
+.fbpadding{
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+.fbpadding2{
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+.fbtext2{
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 16px;
+    text-align: center;
+    color: rgb(212, 61, 61);
+    font-weight: 700;
+    
 }
