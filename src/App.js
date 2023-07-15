@@ -25,7 +25,10 @@ function longPollController(task) {
     if (polling) {
       setTimeout(async () => {
         try {
-          await longPoll();
+          let status = await longPoll();
+          if (status >= 400) {
+            polling = false;
+          }
         } catch (error) {
           polling = false;
         }
@@ -54,7 +57,7 @@ function pollingController(task) {
     } catch (error) {
       cancel();
     }
-  }, 3000);
+  }, 1000);
 
   cancel = () => {
     clearInterval(interval);
@@ -103,34 +106,19 @@ class App extends React.Component {
     }
   }
 
-  async componentDidMount() {
-
-    // try to login with session id from local storage
-    const session_id = localStorage.getItem("session_id");
-    if (session_id) {
-      const response = await this.apiRequest("/user", "POST", { session_id: session_id });
-      const data = await response.json();
-      if (response.status === 200) {
-        this.setState({ user: data.user });
-      } else {
-        localStorage.removeItem("session_id");
-      }
-    }
-
-    // long polling for user updates
-    if (this.state.user !== null) {
-      this.userState = -1;
+  startPolling(user) {
+    this.userState = -1;
       const longPoll = async () => {
         const response = await this.apiRequest("/user_state/", "POST",
           {
-            session_id: this.state.user.session_id,
+            session_id: user.session_id,
             state: this.userState
           });
         const data = await response.json();
         if (response.status === 200) {
           if (this.userState === -1) {
             this.userState = data.state;
-            return;
+            return response.status;
           }
           if (data.state !== this.userState) {
             this.userState = data.state;
@@ -138,10 +126,28 @@ class App extends React.Component {
             await this.updateUser();
           }
         }
+        return response.status;
       }
 
-      this.lpCancel = pollingController(longPoll);
+      const lpBound = longPoll.bind(this);
 
+      this.lpCancel = pollingController(lpBound);
+  }
+
+
+
+  async componentDidMount() {
+
+    // try to login with session id from local storage
+    const session_id = localStorage.getItem("session_id");
+    if (session_id) {
+      const response = await this.apiRequest("/user/", "POST", { session_id: session_id });
+      const data = await response.json();
+      if (response.status === 200) {
+        this.setUser(data.user);
+      } else {
+        localStorage.removeItem("session_id");
+      }
     }
 
 
@@ -229,18 +235,40 @@ class App extends React.Component {
 
   async updateUser() {
     const response = await this.apiRequest("/user/", "POST", { session_id: this.state.user.session_id });
-    const data = await response.json();
+   
+    if(response.status === 200){
+      const data = await response.json();
+      this.setUser(data.user);
+    }
+  }
 
-    this.setState({ user: data.user });
+  setUser(user) {
+
+    // stop polling for old user if it exists
+    let newPolling = false;
+    if(this.state.user !== null && (user===null || this.state.user.session_id !== user.session_id)){
+      if (this.lpCancel) {
+        this.lpCancel();
+      }
+      newPolling = true;
+    } else if(this.state.user === null && user !== null){
+      newPolling = true;
+    }
+
+    this.setState({ user: user });
+
+    if(newPolling && user !== null){
+      this.startPolling(user);
+    }
+
   }
 
 
   async login(username, password) {
     const response = await this.apiRequest("/login/", "POST", { username: username, password: password });
     const data = await response.json();
-    console.log(data);
     if (response.status === 200) {
-      this.setState({ user: data.user });
+      this.setUser(data.user);
 
       // set session in local storage
       localStorage.setItem("session_id", data.user.session_id);
@@ -262,7 +290,7 @@ class App extends React.Component {
     const data = await response.json();
     console.log(data);
     if (response.status === 200) {
-      this.setState({ user: null });
+      this.setUser(null);
       this.redirect("/");
       return true;
     }
@@ -293,6 +321,7 @@ class App extends React.Component {
 
 
     return (
+
 
       <Router>
         <Navbar user={this.state.user} app={this} />

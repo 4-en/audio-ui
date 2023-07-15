@@ -49,19 +49,23 @@ function longPollController(task) {
 
 function pollingController(task) {
 
-    var cancel = () => { };
-    var interval = setInterval(async () => {
+    var lul = {
+        cancel: () => { console.log("I shouldn't be called :(") }
+    }
+    const interval = setInterval(async () => {
       try {
         await task();
       } catch (error) {
-        console.log("ERROR");
-        cancel();
+        console.log("Polling error, cancelling");
+        lul.cancel();
       }
-    }, 3000);
+    }, 1000);
   
-    cancel = () => {
-      clearInterval(interval);
+    const cancel = () => {
+        clearInterval(interval);
     };
+
+    lul.cancel = cancel;
   
     return cancel;
   }
@@ -435,6 +439,10 @@ class LibMenu extends React.Component {
 
         };
 
+        // cancel if already polling
+        if (this.longPollCancel !== undefined) {
+            this.longPollCancel();
+        }
         // start long polling task
         this.longPollCancel = pollingController(longPoll);
         //console.log("After long poll");

@@ -361,6 +361,14 @@ class AudioAPI:
             if res is False:
                 raise HTTPException(status_code=400, detail="Item not found")
             return StatusResponse(status=True, message="Progress updated")
+        
+        @self.app.post("/last_played/")
+        async def last_played(auth_request: AuthRequest) -> ItemResponse:
+            """Returns the last played item for the user"""
+            item = self.audioManager.get_last_played_item_by_session_id(auth_request.session_id)
+            if item is None:
+                raise HTTPException(status_code=401, detail="Invalid session id")
+            return ItemResponse(item=item)
 
         
             

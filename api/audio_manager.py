@@ -625,6 +625,33 @@ class AbstractAudioManager:
         
         return self._edit_user_item(user_content)
 
+    def get_last_played_item_by_session_id(self, session_id: str) -> dict:
+        """
+        Get last played item by session id
+        """
+        user = self._get_user_by_session_id(session_id)
+        if user is None or user.check_session(session_id) is False:
+            return None
+        
+        user_library = self._get_user_library_by_id(user.user_id)
+        if user_library is None or len(user_library) == 0:
+            return None
+        
+        def sort_func(item):
+            duration = item["duration"]
+            progress = item["progress"]
+            if progress < 10 or progress > duration * 0.95:
+                return 0
+            return item["last_played"]
+
+        user_library.sort(key=sort_func, reverse=True)
+
+        item = user_library[0]
+
+        if sort_func(item) == 0:
+            return None
+        
+        return item
 
     
 
