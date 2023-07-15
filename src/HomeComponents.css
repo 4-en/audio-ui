@@ -1,0 +1,117 @@
+.last-played-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.last-played-container h2 {
+    margin-bottom: 20px;
+    font-weight: 500;
+    font-size: 1.5rem;
+}
+
+.last-played {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-color);
+    
+    border: 1px solid var(--text-color);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.last-played img {
+    width: 120px;
+    height: 120px;
+    margin-right: 20px;
+}
+
+.last-played-title {
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.recommendations-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.recommendations-title {
+    margin-bottom: 20px;
+    font-weight: 500;
+    font-size: 1.5rem;
+}
+
+.recommendations {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-color);
+    margin-bottom: 20px;
+
+    /* multiple rows if necessary */
+    flex-wrap: wrap;
+}
+
+.recommendation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-color);
+    margin: 0 10px;
+}
+
+.recommendation img {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 10px;
+}
+
+.log-reg-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.log-reg-container h2 {
+    margin-bottom: 20px;
+    font-weight: 500;
+    font-size: 1.5rem;
+}
+
+.log-reg {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+.log-reg-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-color);
+    margin: 0 10px;
+    font-size: 3rem;
+    width: 300px;
+    height: 100px;
+}

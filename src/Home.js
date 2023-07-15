@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 import './App.css';
+import { LastPlayed, Recommendations } from './HomeComponents';
 //import AudioBild from './images/AudioBild.jpg'
 //import Button from 'react-bootstrap/Button';
 //import 'bootstrap/dist/css/bootstrap.min.css';
@@ -13,18 +14,62 @@ import './App.css';
 class Home extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      lastPlayed: null,
+      recommendations: null,
+    };
+
   }
+
+  async componentDidMount() {
+
+    var tasks = [];
+    var sid = "randomandlongstringmaybenotrandom";
+    if (this.props.user) {
+      const user = this.props.user;
+
+      var lpTask = async () => {
+        const lpRequest = await this.props.app.apiRequest("/last_played/", "POST", { session_id: user.session_id });
+        if (lpRequest.status === 200) {
+          const lastPlayed = await lpRequest.json();
+          this.setState({ lastPlayed: lastPlayed.item });
+          sid = user.session_id;
+        }
+      }
+      lpTask = lpTask.bind(this);
+      tasks.push(lpTask);
+    } else {
+      this.setState({ lastPlayed: null });
+    }
+
+    var recTask = async () => {
+      const recRequest = await this.props.app.apiRequest("/recommend/", "POST", {
+        session_id: sid,
+        amount: 5
+      });
+      if (recRequest.status === 200) {
+        const recommendations = await recRequest.json();
+        this.setState({ recommendations: recommendations.items });
+      }
+    }
+    recTask = recTask.bind(this);
+    tasks.push(recTask);
+
+    for (var i = 0; i < tasks.length; i++) {
+      tasks[i]();
+    }
+  }
+
+
 
   render() {
     return (
       <div>
-        <header>
-          <a href="/">
 
-          </a>
-        </header>
+        <LastPlayed user={this.props.user} lastPlayed={this.state.lastPlayed} />
+        <Recommendations recommendations={this.state.recommendations} />
         <div id='bild'>
-          <img src="./static/AudioBild.jpg" alt="..." />
+
           <p style={{ margin: '20px 0' }}> </p>
 
           <div className='lbutton'>
