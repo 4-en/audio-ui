@@ -311,7 +311,6 @@ class App extends React.Component {
     }
 
 
-    let home = <Home library={this} />;
 
     if (!this.state.apiAvailable) {
       return (
@@ -328,7 +327,7 @@ class App extends React.Component {
         <div className="AudioUI">
           {redirect === null ? null : <Navigate to={redirect} />}
           <Routes>
-            <Route path="/" element={home} />
+            <Route path="/" element={<Home user={this.state.user} app={this} />} />
             <Route path="/library" element={<LibMenu app={this} user={this.state.user} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
             <Route path="/login" element={<Login app={this} />} />
             <Route path="/register" element={<Register app={this} />} />

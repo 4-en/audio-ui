@@ -392,6 +392,18 @@ class LibMenu extends React.Component {
             this.setState({ search: search });
         }
 
+        var view = urlParams.get('view');
+        if (view !== null) {
+            // replace '+' with ' '
+            view = view.replaceAll('+', ' ');
+            for (let type in MenuType) {
+                if (MenuType[type].toLowerCase() === view.toLowerCase()) {
+                    this.setState({ type: MenuType[type] });
+                    break;
+                }
+            }
+        }
+
 
 
         // load store if this is the store menu
