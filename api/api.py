@@ -161,7 +161,6 @@ class AudioAPI:
         # test route
         @self.app.get("/test/")
         async def test():
-            self.mydb.ping(reconnect=True, attempts=3, delay=5)
             return StatusResponse(status=True, message="Audio API is running")
 
         # login with username and password
