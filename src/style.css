@@ -76,8 +76,18 @@ body {
     min-height: 500px;
     padding: 30px;
     top: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+
   
   }
+
+.audioRoutes {
+  display: block;
+}
 
   @keyframes spin-anim {
     from {

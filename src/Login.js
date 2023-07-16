@@ -66,11 +66,11 @@ class Login extends React.Component {
                                 <div className='or'>
                                 <h2>or</h2>
                                 </div>
-                                <p className='lbutton'>
+                                <div className='lbutton'>
                                     <div className='textpadding'>
                                     <Link className='lb' to="/register">Register</Link>
                                     </div>
-                                </p>
+                                </div>
                                 <div className='fbpadding2'>
                                         <h5 className='fbtext2'>{loginfb}</h5>
                                         </div>

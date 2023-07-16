@@ -25,10 +25,16 @@
     padding: 15px;
 }
 
+.last-played:hover {
+    /* light up on hover */
+    box-shadow: 0px 0px 10px 0px var(--text-color);
+}
+
 .last-played img {
     width: 120px;
     height: 120px;
     margin-right: 20px;
+    border-radius: 10px;
 }
 
 .last-played-title {
@@ -77,6 +83,12 @@
     width: 120px;
     height: 120px;
     margin-bottom: 10px;
+    border-radius: 10px;
+}
+
+.recommendation img:hover {
+    /* light up on hover */
+    box-shadow: 0px 0px 10px 0px var(--text-color);
 }
 
 .log-reg-container {

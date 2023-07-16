@@ -132,11 +132,11 @@ class Register extends React.Component {
                                 <h2>or</h2>
                                 </div>
                                 </form>
-                                <p className='lbutton'>
+                                <div className='lbutton'>
                                     <div className='textpadding'>
                                     <Link className='lb' to="/login">Login</Link>
                                     </div>
-                                </p>
+                                </div>
                                 <div className='fbpadding2'>
                                         <h5 className='fbtext2'>{loginfb}</h5>
                                         </div>

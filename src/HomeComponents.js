@@ -91,11 +91,12 @@ class Recommendations extends React.Component {
 
         if (!this.props.recommendations || this.props.recommendations.length === 0) return null;
 
+        let idx = 0;
         const recs = this.props.recommendations.map((rec) => {
             const url = "/static/covers/" + rec.cover_file;
             const toUrl = "/store?search=" + rec.title.replaceAll(" ", "+") + "&view=all";
             return (
-                <Link className="recommendation" to={toUrl} title={rec.title}>
+                <Link key={++idx} className="recommendation" to={toUrl} title={rec.title}>
                     <img className="recommendation-image" src={url} />
                 </Link>
             );

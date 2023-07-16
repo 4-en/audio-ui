@@ -326,7 +326,7 @@ class App extends React.Component {
         <Navbar user={this.state.user} app={this} />
         <div className="AudioUI">
           {redirect === null ? null : <Navigate to={redirect} />}
-          <Routes>
+          <Routes className="audioRoutes">
             <Route path="/" element={<Home user={this.state.user} app={this} />} />
             <Route path="/library" element={<LibMenu app={this} user={this.state.user} callback={this.props.callback} ref={this.myMenu} stateChanger={() => { this.filterUpdate(); }} />} />
             <Route path="/login" element={<Login app={this} />} />

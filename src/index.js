@@ -32,9 +32,10 @@ const testroot = ReactDOM.createRoot(document.getElementById('testroot'));
 
 
 root.render(
-  <React.StrictMode>
+  //<React.StrictMode>
+  // no strict mode
     <App callback={testCallback} />
-  </React.StrictMode>
+  //</React.StrictMode>
 );
 
 if (TESTMODE) {
