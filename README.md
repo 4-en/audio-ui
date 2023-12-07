@@ -1,5 +1,5 @@
-# HCI und DB Projekt
-## Audiobook and Podcast Library
+# Audiobook and Podcast Library
+A simple react web app that allows users to buy content from a store, display it in their personal library and listen to it.
 
 ## Installation
 ### Frontend
